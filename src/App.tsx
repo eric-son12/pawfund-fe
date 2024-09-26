@@ -1,25 +1,48 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  HashRouter as Router,
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+import { ThemeProvider } from "@mui/material";
+
+import theme from "./theme";
+import Home from "./pages/home/Home";
+import Login from "./pages/login/Login";
+import Register from "./pages/register/Register";
+
+import "./App.css";
+import CreatePost from "./pages/create-post/CreatePost";
+import Detail from "./pages/detail/Detail";
 
 function App() {
+  const router = createBrowserRouter([
+    {
+      path: "/",
+      element: <Home />,
+    },
+    {
+      path: "login",
+      element: <Login />,
+    },
+    {
+      path: "register",
+      element: <Register />,
+    },
+    {
+      path: "create-post",
+      element: <CreatePost />,
+    },
+    {
+      path: "detail/:slug",
+
+      element: <Detail />,
+    },
+  ]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   );
 }
 
