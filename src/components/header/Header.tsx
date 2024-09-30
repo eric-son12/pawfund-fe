@@ -39,18 +39,21 @@ const Header: React.FC = () => {
       </div>
 
       <div className="action-group-wrap">
-        <IconButton style={{ color: "white", marginRight: "8px" }}>
+        <IconButton
+          style={{ color: "white", marginRight: "8px" }}
+          onClick={() => navigate("/notification")}
+        >
           <NotificationsNoneOutlinedIcon />
         </IconButton>
         <IconButton
           style={{ color: "white", marginRight: "8px" }}
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/listing")}
         >
           <ArticleOutlinedIcon />
         </IconButton>
         <IconButton
           style={{ color: "white", marginRight: "8px" }}
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/profile")}
         >
           <PersonIcon />
         </IconButton>

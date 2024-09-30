@@ -36,7 +36,7 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
   return (
     <div
       className="card-post"
-      onClick={() => navigate(`/detail/${props.post.id}`)}
+      onClick={() => !props.isOwner && navigate(`/detail/${props.post.id}`)}
     >
       <img className="pet-thumb" src={props.post.thumb} alt="pet-thumb" />
 
@@ -47,25 +47,27 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
           <p className="pet-location">{props.post.location}</p>
         </div>
 
-        <div className="profile-wrap">
-          <div className="profile-detail">
-            <img
-              className="profile-thumb"
-              src={props.post.profile.avatar}
-              alt="profile-thumb"
-            />
-            <div>
-              <p className="profile-name">{props.post.profile.name}</p>
-              <div className="rating">
-                <div className="score">
-                  {props.post.profile.rate}{" "}
-                  <img width={12} src="icons/ico-rating.svg" alt="" />
+        {!props.isOwner && (
+          <div className="profile-wrap">
+            <div className="profile-detail">
+              <img
+                className="profile-thumb"
+                src={props.post.profile.avatar}
+                alt="profile-thumb"
+              />
+              <div>
+                <p className="profile-name">{props.post.profile.name}</p>
+                <div className="rating">
+                  <div className="score">
+                    {props.post.profile.rate}{" "}
+                    <img width={12} src="icons/ico-rating.svg" alt="" />
+                  </div>
+                  <span>{props.post.profile.count} đánh giá</span>
                 </div>
-                <span>{props.post.profile.count} đánh giá</span>
               </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className="action-wrap">
@@ -77,7 +79,11 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
         />
 
         {props.isOwner ? (
-          <Button variant="contained" startIcon={<EditOutlinedIcon />}>
+          <Button
+            variant="contained"
+            startIcon={<EditOutlinedIcon />}
+            onClick={() => navigate(`/edit-post/${props.post.id}`)}
+          >
             Chỉnh sửa
           </Button>
         ) : (

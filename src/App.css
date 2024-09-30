@@ -10,6 +10,7 @@ body {
 
 :root {
   --color-primary: #00925d;
+  --color-secondary: #eb3f5e;
 
   /* Customine variables themes */
   --variant-textColor: #00925d !important;

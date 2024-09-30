@@ -23,7 +23,11 @@ const Login: React.FC = () => {
         .required("Password is required"),
     }),
     onSubmit: (values) => {
-      alert(JSON.stringify(values, null, 2));
+      const { email, password } = values;
+      if (email === "admin@gmail.com" && password === "admin123") {
+        navigate("/admin/dashboard");
+      }
+      // alert(JSON.stringify(values, null, 2));
     },
   });
 

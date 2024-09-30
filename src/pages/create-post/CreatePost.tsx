@@ -110,9 +110,13 @@ const CreatePost: React.FC = () => {
 
           <form
             onSubmit={formik.handleSubmit}
-            style={{ maxWidth: "500px", margin: "0 auto" }}
+            style={{ maxWidth: "600px", margin: "0 auto" }}
           >
-            <FormControl component="fieldset" style={{ marginBottom: "16px" }}>
+            <FormControl
+              fullWidth
+              component="fieldset"
+              style={{ marginBottom: "16px" }}
+            >
               <RadioGroup
                 id="type"
                 name="type"
@@ -233,7 +237,13 @@ const CreatePost: React.FC = () => {
               </div>
             </FormControl>
 
-            <Button color="primary" variant="contained" fullWidth type="submit">
+            <Button
+              color="primary"
+              variant="contained"
+              fullWidth
+              type="submit"
+              style={{ marginTop: "16px" }}
+            >
               Đăng tin
             </Button>
           </form>

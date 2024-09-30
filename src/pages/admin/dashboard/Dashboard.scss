@@ -1,0 +1,31 @@
+.dashboard-page {
+  background: #f0f0f0;
+
+  .dashboard-container {
+    min-height: calc(100vh - 106px);
+    margin: 1rem;
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 1rem;
+
+    .sidebar {
+      width: 200px;
+      padding: 1rem;
+      background: white;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border-radius: 8px;
+    }
+
+    .content {
+      padding: 1rem;
+      background: white;
+      border-radius: 8px;
+
+      .title {
+        margin-bottom: 24px;
+      }
+    }
+  }
+}
