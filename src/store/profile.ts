@@ -2,8 +2,6 @@
 // This file contains proprietary and confidential information.
 // Unauthorized copying of this file, via any medium, is strictly prohibited.
 
-import Long from "long";
-
 import type { StoreGet, StoreSet } from "../store";
 import axios from "axios";
 
