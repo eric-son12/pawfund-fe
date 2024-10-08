@@ -18,7 +18,7 @@ export interface UserProfile {
   birthdayDay: number;
   birthdayMonth: number;
   birthdayYear: number;
-  timestampCreated: Long;
+  timestampCreated: number;
   avatarUrl: string;
   phoneNumber: string;
 }
