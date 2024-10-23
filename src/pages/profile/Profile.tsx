@@ -1,51 +1,39 @@
-import React, { useState } from "react";
-import {
-  Avatar,
-  Button,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
-  InputLabel,
-  MenuItem,
-  Radio,
-  RadioGroup,
-  Select,
-  Stack,
-  TextField,
-} from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Avatar, Button, TextField } from "@mui/material";
 import { useFormik } from "formik";
-import * as Yup from "yup";
-import AddIcon from "@mui/icons-material/Add";
 
+import { useStore } from "../../store";
 import Header from "../../components/header/Header";
 
 import "./Profile.scss";
-
-interface IProfileForm {
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  dob: string;
-  phone: string;
-  location: string;
-  avatar: string;
-}
+import { UserProfile } from "../../store/profile";
 
 const Profile: React.FC = () => {
-  const formik = useFormik<IProfileForm>({
+  const fetchProfile = useStore((store) => store.fetchProfile);
+  const profile = useStore((store) => store.profile.userProfile);
+
+  const formik = useFormik<UserProfile>({
     initialValues: {
-      firstName: "Eric",
-      lastName: "Son",
-      fullName: "Eric Son",
-      dob: "12/03/2002",
-      phone: "123456789",
-      location: "HCM • Phú Nhuận",
-      avatar: "https://i.pravatar.cc/500",
+      email: "",
+      fullName: "",
+      phone: "",
+      address: "",
+      username: "",
     },
     onSubmit: (values) => {
       console.log("Form values:", values);
     },
   });
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  useEffect(() => {
+    if (profile) {
+      formik.setValues(profile);
+    }
+  }, [profile]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -67,40 +55,18 @@ const Profile: React.FC = () => {
             style={{ maxWidth: "600px", margin: "0 auto" }}
           >
             <div className="avatar-wrap">
-              {formik.values.avatar ? (
-                <Avatar
-                  alt={formik.values.firstName}
-                  src={formik.values.avatar}
-                ></Avatar>
-              ) : (
-                <Avatar>{formik.values.firstName}</Avatar>
-              )}
+              <Avatar>{formik.values.fullName.slice(0, 1)}</Avatar>
             </div>
             <TextField
               fullWidth
-              id="firstName"
-              name="firstName"
-              label="Họ"
-              value={formik.values.firstName}
+              id="email"
+              name="email"
+              label="Email"
+              value={formik.values.email}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={
-                formik.touched.firstName && Boolean(formik.errors.firstName)
-              }
-              helperText={formik.touched.firstName && formik.errors.firstName}
-              style={{ marginBottom: "16px" }}
-            />
-
-            <TextField
-              fullWidth
-              id="lastName"
-              name="lastName"
-              label="Tên"
-              value={formik.values.lastName}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={formik.touched.lastName && Boolean(formik.errors.lastName)}
-              helperText={formik.touched.lastName && formik.errors.lastName}
+              error={formik.touched.email && Boolean(formik.errors.email)}
+              helperText={formik.touched.email && formik.errors.email}
               style={{ marginBottom: "16px" }}
             />
 
@@ -132,14 +98,14 @@ const Profile: React.FC = () => {
 
             <TextField
               fullWidth
-              id="location"
-              name="location"
+              id="address"
+              name="address"
               label="Địa chỉ"
-              value={formik.values.location}
+              value={formik.values.address}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.location && Boolean(formik.errors.location)}
-              helperText={formik.touched.location && formik.errors.location}
+              error={formik.touched.address && Boolean(formik.errors.address)}
+              helperText={formik.touched.address && formik.errors.address}
               style={{ marginBottom: "16px" }}
             />
 

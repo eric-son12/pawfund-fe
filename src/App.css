@@ -36,3 +36,12 @@ body {
 .slick-prev::before {
   font-size: 28px;
 }
+
+.letter-detail-content p {
+  line-height: 22px;
+}
+
+.letter-detail-content p span {
+  font-size: 12px;
+  font-weight: 600;
+}

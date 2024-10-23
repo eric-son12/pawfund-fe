@@ -1,35 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button, TextField } from "@mui/material";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
+import { useStore } from "../../store";
+
 import "./Login.scss";
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const onLogin = useStore((store) => store.login);
+  const user = useStore((store) => store.profile.user);
+  const error = useStore((store) => store.profile.error);
 
   const formik = useFormik({
     initialValues: {
-      email: "",
+      username: "",
       password: "",
     },
     validationSchema: Yup.object({
-      email: Yup.string()
-        .email("Invalid email address")
-        .required("Email is required"),
-      password: Yup.string()
-        .min(6, "Password must be at least 6 characters")
-        .required("Password is required"),
+      username: Yup.string().required("Email is required"),
+      password: Yup.string().required("Password is required"),
     }),
-    onSubmit: (values) => {
-      const { email, password } = values;
-      if (email === "admin@gmail.com" && password === "admin123") {
+    onSubmit: async (values) => {
+      const { username, password } = values;
+      if (username === "admin" && password === "admin") {
         navigate("/admin/dashboard");
+      } else {
+        onLogin(username, password);
       }
-      // alert(JSON.stringify(values, null, 2));
     },
   });
+
+  useEffect(() => {
+    if (user) {
+      const { role } = user;
+      role === "ROLE_USER" ? navigate("/") : navigate("/admin/dashboard");
+    }
+  }, [user]);
 
   return (
     <div className="login-page">
@@ -47,15 +56,15 @@ const Login: React.FC = () => {
           <div>
             <TextField
               fullWidth
-              id="email"
-              name="email"
-              label="Email Address"
+              id="username"
+              name="username"
+              label="Email"
               variant="outlined"
-              value={formik.values.email}
+              value={formik.values.username}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              error={formik.touched.email && Boolean(formik.errors.email)}
-              helperText={formik.touched.email && formik.errors.email}
+              error={formik.touched.username && Boolean(formik.errors.username)}
+              helperText={formik.touched.username && formik.errors.username}
             />
           </div>
 
@@ -74,7 +83,11 @@ const Login: React.FC = () => {
               helperText={formik.touched.password && formik.errors.password}
             />
           </div>
-
+          {error && (
+            <div style={{ marginTop: "16px" }}>
+              <p style={{ color: "red" }}>{error}</p>
+            </div>
+          )}
           <Button
             color="primary"
             variant="contained"

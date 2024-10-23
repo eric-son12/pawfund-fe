@@ -17,7 +17,6 @@ import { useStore } from "../../store";
 import Header from "../../components/header/Header";
 import CardPost from "../../components/card-post/CardPost";
 import Footer from "../../components/footer/Footer";
-import Loading from "../../components/loading/Loading";
 
 import "./Home.scss";
 
@@ -179,8 +178,6 @@ const Home: React.FC = () => {
       </div>
 
       <Footer />
-
-      <Loading />
     </>
   );
 };

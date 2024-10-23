@@ -13,10 +13,10 @@ const Footer: React.FC = () => {
         <div>
           <p className="bread-cum">Home / Login / Register / Setting</p>
           <div className="socials">
-            <img src="icons/ico-instagram.svg" alt="instagram" />
-            <img src="icons/ico-facebook.svg" alt="facebook" />
-            <img src="icons/ico-twitter.svg" alt="twitter" />
-            <img src="icons/ico-google.svg" alt="google" />
+            <img src="/icons/ico-instagram.svg" alt="instagram" />
+            <img src="/icons/ico-facebook.svg" alt="facebook" />
+            <img src="/icons/ico-twitter.svg" alt="twitter" />
+            <img src="/icons/ico-google.svg" alt="google" />
           </div>
         </div>
       </div>

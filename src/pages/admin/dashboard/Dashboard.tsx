@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import _ from "lodash";
 import { useNavigate } from "react-router-dom";
 import {
   Button,
@@ -15,11 +16,12 @@ import {
   Paper,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 
+import { useStore } from "../../../store";
+import { LetterVolunteer } from "../../../store/users";
 import Header from "../../../components/header/Header";
 import Footer from "../../../components/footer/Footer";
 
@@ -27,45 +29,58 @@ import "./Dashboard.scss";
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate();
-  const [type, setType] = useState<string>("post");
+  const [type, setType] = useState<string>("user");
   const [open, setOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<"edit" | "delete">("edit");
   const [selectedRow, setSelectedRow] = useState<any>(null);
 
+  const users = useStore((store) => store.users.users);
+  const fetchUsers = useStore((store) => store.fetchUsers);
+
+  const [showLetter, setShowLetter] = useState<boolean>(false);
+  const [letter, setLeter] = useState<LetterVolunteer>();
+  const fetchLetter = useStore((store) => store.getVolunteerDetail);
+  const confirmVolunteer = useStore((store) => store.confirmVolunteer);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "firstName", headerName: "First name", width: 130 },
-    { field: "lastName", headerName: "Last name", width: 130 },
+    { field: "id", headerName: "ID", width: 50 },
+    { field: "email", headerName: "Email", flex: 1 },
+    { field: "fullName", headerName: "Fullname", flex: 1 },
     {
-      field: "age",
-      headerName: "Age",
-      type: "number",
-      width: 90,
+      field: "phone",
+      headerName: "Phone",
+      type: "string",
+      flex: 1,
     },
     {
-      field: "fullName",
-      headerName: "Full name",
-      description: "This column has a value getter and is not sortable.",
-      sortable: true,
-      width: 160,
-      valueGetter: (value, row) =>
-        `${row.firstName || ""} ${row.lastName || ""}`,
+      field: "address",
+      headerName: "Address",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "role",
+      headerName: "Role",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      type: "string",
     },
     {
       field: "action",
       headerName: "",
-      flex: 1,
+      width: 70,
       renderCell: (params) => (
         <div>
           <IconButton
-            color="primary"
-            onClick={() => handleClickOpen("edit", params.row)}
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
             color="secondary"
-            onClick={() => handleClickOpen("delete", params.row)}
+            onClick={() => handleClickOpen(params.row)}
           >
             <DeleteIcon />
           </IconButton>
@@ -74,28 +89,16 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  const rows = [
-    { id: 1, lastName: "Snow", firstName: "Jon", age: 35 },
-    { id: 2, lastName: "Lannister", firstName: "Cersei", age: 42 },
-    { id: 3, lastName: "Lannister", firstName: "Jaime", age: 45 },
-    { id: 4, lastName: "Stark", firstName: "Arya", age: 16 },
-    { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-    { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-    { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-    { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-    { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-  ];
+  const paginationModel = { page: 0, pageSize: 10 };
 
-  const paginationModel = { page: 0, pageSize: 5 };
-
-  const handleClickOpen = (type: "edit" | "delete", row: any) => {
-    setDialogType(type);
+  const handleClickOpen = (row: any) => {
     setSelectedRow(row);
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
+    setShowLetter(false);
   };
 
   const handleEditSubmit = () => {
@@ -103,13 +106,17 @@ const Dashboard: React.FC = () => {
     handleClose();
   };
 
-  const handleDeleteSubmit = () => {
-    console.log("Deleting post:", selectedRow);
-    handleClose();
+  const showDetailVolunteer = async (id: string, row: any) => {
+    setSelectedRow(row);
+    const letterDetail = await fetchLetter(id);
+    setLeter(letterDetail);
+    !_.isEmpty(letterDetail) && setShowLetter(true);
   };
 
-  const handleChangeType = (type: string) => {
-    setType(type);
+  const handleConfirmVolunteer = async () => {
+    const { id } = selectedRow;
+    const res = await confirmVolunteer(id);
+    res && setShowLetter(false);
   };
 
   return (
@@ -149,13 +156,17 @@ const Dashboard: React.FC = () => {
             </h1>
 
             <div className="table-wrap">
-              <Paper sx={{ height: 400, width: "100%" }}>
+              <Paper sx={{ height: "100%", width: "100%" }}>
                 <DataGrid
-                  rows={rows}
+                  rows={users}
                   columns={columns}
                   initialState={{ pagination: { paginationModel } }}
                   pageSizeOptions={[5, 10]}
-                  checkboxSelection
+                  onRowClick={(row) => {
+                    if (row.row.role === "VOLUNTEER") {
+                      showDetailVolunteer(row.row.id, row);
+                    }
+                  }}
                   sx={{ border: 0 }}
                 />
               </Paper>
@@ -164,38 +175,72 @@ const Dashboard: React.FC = () => {
         </div>
 
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>
-            {dialogType === "edit" ? "Edit Post" : "Delete Post"}
-          </DialogTitle>
+          <DialogTitle>Do you want to ban this user?</DialogTitle>
           <DialogContent>
-            {dialogType === "edit" ? (
-              <div>
-                <p>Edit the details of the post:</p>
-                <p>ID: {selectedRow?.id}</p>
-                <p>First Name: {selectedRow?.firstName}</p>
-                <p>Last Name: {selectedRow?.lastName}</p>
-              </div>
-            ) : (
-              <div>
-                <p>Are you sure you want to delete this post?</p>
-                <p>ID: {selectedRow?.id}</p>
-                <p>First Name: {selectedRow?.firstName}</p>
-              </div>
-            )}
+            <div>
+              <p>
+                <span>ID: </span>
+                {selectedRow?.id}
+              </p>
+              <p>
+                <span>Name: </span>
+                {selectedRow?.fullName}
+              </p>
+            </div>
           </DialogContent>
           <DialogActions>
+            <Button onClick={handleEditSubmit} color="primary">
+              Ban
+            </Button>
             <Button onClick={handleClose} color="primary">
               Cancel
             </Button>
-            {dialogType === "edit" ? (
-              <Button onClick={handleEditSubmit} color="primary">
-                Save
-              </Button>
-            ) : (
-              <Button onClick={handleDeleteSubmit} color="secondary">
-                Delete
-              </Button>
-            )}
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={showLetter} onClose={handleClose}>
+          <DialogTitle>Letter Detail</DialogTitle>
+          <DialogContent>
+            <div className="letter-detail-content">
+              <p>
+                <span>Email: </span> {letter?.email}
+              </p>
+              <p>
+                <span>FullName: </span> {letter?.fullName}
+              </p>
+              <p>
+                <span>Gender: </span> {letter?.gender}
+              </p>
+              <p>
+                <span>Phone: </span> {letter?.phone}
+              </p>
+              <p>
+                <span>Address: </span> {letter?.address}
+              </p>
+              <p>
+                <span>DOB: </span> {letter?.dob}
+              </p>
+              <p>
+                <span>CCCD: </span> {letter?.cccd}
+              </p>
+              <p>
+                <span>Experience: </span> {letter?.experience}
+              </p>
+              <p>
+                <span>CurrentJob: </span> {letter?.currentJob}
+              </p>
+              <p>
+                <span>Reason: </span> {letter?.reason}
+              </p>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmVolunteer} color="primary">
+              Approve
+            </Button>
+            <Button onClick={handleClose} color="secondary">
+              Close
+            </Button>
           </DialogActions>
         </Dialog>
       </div>

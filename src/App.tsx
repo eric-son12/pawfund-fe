@@ -18,8 +18,14 @@ import EditPost from "./pages/edit-post/EditPost";
 import Listing from "./pages/listing/Listing";
 import Notification from "./pages/notification/Notification";
 import Profile from "./pages/profile/Profile";
+import ProtectedRoute from "./utils/ProtectedRoute";
+import Loading from "./components/loading/Loading";
+import NotificationItem from "./components/NotificationItem/NotificationItem";
 
 function App() {
+  const isAuthenticated = !!localStorage.getItem("token");
+  const isAdmin = true;
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -43,7 +49,6 @@ function App() {
     },
     {
       path: "detail/:slug",
-
       element: <Detail />,
     },
     {
@@ -52,7 +57,11 @@ function App() {
     },
     {
       path: "listing",
-      element: <Listing />,
+      element: (
+        <ProtectedRoute isAllowed={isAuthenticated && isAdmin}>
+          <Listing />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "notification",
@@ -67,6 +76,8 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <RouterProvider router={router} />
+      <Loading />
+      <NotificationItem />
     </ThemeProvider>
   );
 }

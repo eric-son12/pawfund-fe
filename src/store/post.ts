@@ -15,7 +15,7 @@ export const initialPost: PostState = {
   data: [],
 };
 
-export function PostActions(set: StoreSet, get: StoreGet): PostActions {
+export function postActions(set: StoreSet, get: StoreGet): PostActions {
   return {
     fetchPosts: async () => {
       set((state) => {
@@ -32,6 +32,7 @@ export function PostActions(set: StoreSet, get: StoreGet): PostActions {
       } catch (error) {
         set((state) => {
           state.loading.error = "Error fetching data";
+          state.loading.isLoading = false;
         });
       }
     },
@@ -42,10 +43,14 @@ export function PostActions(set: StoreSet, get: StoreGet): PostActions {
       try {
         const posts = get().post.data;
         const response = posts.find((post) => post.id === id);
+        set((state) => {
+          state.loading.isLoading = false;
+        });
         return response;
       } catch (error) {
         set((state) => {
           state.loading.error = "Error fetching data";
+          state.loading.isLoading = false;
         });
       }
     },

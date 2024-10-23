@@ -3,26 +3,19 @@ import { Button, IconButton } from "@mui/material";
 import ErrorOutlineOutlinedIcon from "@mui/icons-material/ErrorOutlineOutlined";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 
+import { useStore } from "../../store";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
 
 import "./Notification.scss";
 
 const Notification: React.FC = () => {
-  const notifications = [
-    {
-      id: 1,
-      type: "success",
-      title: "Thành công",
-      desc: "Đăng nhập thành công",
-    },
-    {
-      id: 2,
-      type: "error",
-      title: "Thất bại",
-      desc: "Đăng bài thất bại",
-    },
-  ];
+  const notifications = useStore((store) => store.notification.data);
+  const clearNotification = useStore((store) => store.clearNotification);
+
+  const handleClearNotification = () => {
+    clearNotification();
+  };
 
   return (
     <>
@@ -37,11 +30,11 @@ const Notification: React.FC = () => {
               notifications.length > 0 &&
               notifications.map((notification, index) => (
                 <div
-                  className={`notification-item ${notification.type}`}
+                  className={`notification-item ${notification.status.toLowerCase()}`}
                   key={index}
                 >
                   <IconButton style={{ padding: 0 }}>
-                    {notification.type === "success" ? (
+                    {notification.status.toLowerCase() === "success" ? (
                       <CheckCircleOutlineOutlinedIcon
                         style={{ color: "white" }}
                         fontSize="large"
@@ -54,16 +47,30 @@ const Notification: React.FC = () => {
                     )}
                   </IconButton>
                   <div>
-                    <p className="title">{notification.title}</p>
-                    <p className="desc">{notification.desc}</p>
+                    <p className="title">{notification.status}</p>
+                    <p className="desc">{notification.content}</p>
                   </div>
                 </div>
               ))}
           </div>
 
-          <div className="action-wrap">
-            <Button color="info" variant="outlined">Clear all</Button>
-          </div>
+          {notifications.length === 0 && (
+            <div className="no-notification">
+              <p>No notification</p>
+            </div>
+          )}
+
+          {notifications.length > 0 && (
+            <div className="action-wrap">
+              <Button
+                color="info"
+                variant="outlined"
+                onClick={handleClearNotification}
+              >
+                Clear all
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 

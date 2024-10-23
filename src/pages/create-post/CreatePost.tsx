@@ -18,6 +18,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Header from "../../components/header/Header";
 
 import "./CreatePost.scss";
+import axios from "axios";
 
 interface ICategory {
   id: number;
@@ -53,7 +54,7 @@ const CreatePost: React.FC = () => {
       value: "other",
     },
   ]);
-  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [selectedImages, setSelectedImages] = useState<string[]>([]);
 
   const formik = useFormik<IPostForm>({
     initialValues: {
@@ -81,20 +82,41 @@ const CreatePost: React.FC = () => {
     },
   });
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
-      setSelectedImages((prevImages) => [...prevImages, ...filesArray]); // Add new images to the existing ones
-      formik.setFieldValue("images", [...formik.values.images, ...filesArray]);
+      const uploadImages = async (filesArray: any) => {
+        const formData = new FormData();
+        formData.append("file", filesArray);
+        formData.append("upload_preset", "blnhfbwk"); // Replace with your Cloudinary preset
+
+        try {
+          const response = await axios.post(
+            "https://api.cloudinary.com/v1_1/dzclrmcf5/image/upload", // Replace with your Cloudinary cloud name
+            formData
+          );
+          return response.data.secure_url; // Get the uploaded image URL
+        } catch (error) {
+          console.error("Error uploading image:", error);
+          return null;
+        }
+      };
+
+      const uploadPromises = filesArray.map((file: any) => uploadImages(file));
+      const urls = await Promise.all(uploadPromises);
+
+      setSelectedImages([...selectedImages, ...urls]);
+      formik.setFieldValue("images", [...formik.values.images, ...urls]);
     }
   };
 
   const renderImagePreviews = () => {
-    return selectedImages.map((image, index) => {
-      const objectUrl = URL.createObjectURL(image);
+    return selectedImages.map((src, index) => {
       return (
         <div className="gallery-item" key={index}>
-          <img src={objectUrl} alt={`Preview ${index}`} />
+          <img src={src} alt={`Preview ${index}`} />
         </div>
       );
     });
@@ -243,6 +265,7 @@ const CreatePost: React.FC = () => {
               fullWidth
               type="submit"
               style={{ marginTop: "16px" }}
+              onClick={() => console.log("FORM", formik.values)}
             >
               Đăng tin
             </Button>
