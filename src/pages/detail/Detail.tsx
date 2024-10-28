@@ -11,7 +11,6 @@ import { Button, Chip, IconButton } from "@mui/material";
 import { useStore } from "../../store";
 import Header from "../../components/header/Header";
 import Footer from "../../components/footer/Footer";
-import { Post } from "../../components/card-post/CardPost";
 
 import "./Detail.scss";
 
@@ -53,8 +52,6 @@ const Detail: React.FC = () => {
     slidesToScroll: 1,
   };
 
-  console.log("post?.images", post?.images);
-
   return (
     <>
       <Header />
@@ -74,6 +71,13 @@ const Detail: React.FC = () => {
                       />
                     </div>
                   ))}
+                  <div>
+                    <img
+                      src={"/bg-detail-default.jpg"}
+                      alt={`Image`}
+                      style={{ width: "100%", height: "auto" }}
+                    />
+                  </div>
                 </Slider>
               </div>
             )}

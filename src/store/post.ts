@@ -35,6 +35,17 @@ export interface CreatePostReceiveRequest {
   reason: string;
 }
 
+export interface EditPostRequest {
+  adoptId: number;
+  type: string;
+  images: string[];
+  age: number;
+  title: string;
+  description: string;
+  address: string;
+  breed: string;
+}
+
 export interface PostActions {
   fetchPosts: (
     type?: number,
@@ -52,7 +63,7 @@ export interface PostActions {
   ) => Promise<void>;
   createPost: (values: CreatePostRequest) => Promise<void>;
   createPostReceive: (values: CreatePostReceiveRequest) => Promise<void>;
-  updatePost: (values: CreatePostRequest) => Promise<void>;
+  updatePost: (values: EditPostRequest) => Promise<void>;
   deletePost: (id: number) => Promise<void>;
   updatePostGive: (id: number, statusCode: number) => Promise<void>;
   updatePostReceive: (id: number, statusCode: number) => Promise<void>;
@@ -197,7 +208,7 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
         state.loading.isLoading = true;
       });
       try {
-        await axios.post(`${BASE_URL}/pet/create`, values);
+        await axios.post(`${BASE_URL}/adopt/update`, values);
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;

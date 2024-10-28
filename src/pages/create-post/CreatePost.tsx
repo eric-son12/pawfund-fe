@@ -140,18 +140,18 @@ const CreatePost: React.FC = () => {
       const uploadImages = async (filesArray: any) => {
         const formData = new FormData();
         formData.append("file", filesArray);
-        formData.append("upload_preset", "blnhfbwk"); // Replace with your Cloudinary preset
+        formData.append("upload_preset", "blnhfbwk");
 
         try {
           const response = await fetch(
-            `https://api.cloudinary.com/v1_1/dzclrmcf5/image/upload`, // Replace with your Cloudinary cloud name
+            `https://api.cloudinary.com/v1_1/dzclrmcf5/image/upload`,
             {
               method: "POST",
               body: formData,
             }
           );
           const data = await response.json();
-          return data.secure_url; // Get the uploaded image URL
+          return data.secure_url;
         } catch (error) {
           console.error("Error uploading image:", error);
           return null;
