@@ -21,7 +21,7 @@ import "./EditPost.scss";
 
 const EditPost = () => {
   const { slug } = useParams(); // Get the slug from the URL
-  const [post, setPost] = useState<Post>({
+  const [post, setPost] = useState<any>({
     id: 1,
     type: "buy",
     name: "Mèo Anh lông ngắn cần tìm nhà",
@@ -103,10 +103,10 @@ const EditPost = () => {
 
           <Formik
             initialValues={{
-              title: post.name,
-              description: post.info,
-              category: post.category,
-              location: post.location,
+              title: post.title,
+              description: post.petName,
+              category: post.petType,
+              location: post.address,
               age: post.age,
               type: post.type, // "buy" or "sell"
             }}
@@ -187,7 +187,7 @@ const EditPost = () => {
                   </FormLabel>
                   <div className="gallery-photo">
                     <div className="gallery-item" key={1111}>
-                      <img src={post.thumb} alt={`Preview ${1111}`} />
+                      <img src={post.images[0]} alt={`Preview ${1111}`} />
                     </div>
                     {selectedImages.length > 0 && renderImagePreviews()}
                     <div className="upload-image">

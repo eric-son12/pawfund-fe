@@ -15,29 +15,35 @@ import { Post } from "../../components/card-post/CardPost";
 
 import "./Detail.scss";
 
+export interface PostDetail {
+  id: number;
+  title: string;
+  petName: string;
+  petType: string;
+  age: number;
+  address: string;
+  fullName: string;
+  profileImage: string | null;
+  type: string;
+  images: string[];
+  application: number | null;
+}
+
 const Detail: React.FC = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
   const postDetail = useStore((store) => store.postDetailFetch);
 
-  const [post, setPost] = useState<Post>();
+  const [post, setPost] = useState<PostDetail>();
 
   useEffect(() => {
     const getPostDetail = async () => {
       const data = await postDetail(Number(slug));
       setPost(data);
-      console.log(data);
     };
 
     getPostDetail();
   }, [slug]);
-
-  const images = Array(5)
-    .fill(0)
-    .map((_, i) => ({
-      id: i + 1,
-      src: `https://picsum.photos/id/${i + 1}/500/300`,
-    }));
 
   const settings = {
     dots: true,
@@ -47,6 +53,8 @@ const Detail: React.FC = () => {
     slidesToScroll: 1,
   };
 
+  console.log("post?.images", post?.images);
+
   return (
     <>
       <Header />
@@ -54,19 +62,21 @@ const Detail: React.FC = () => {
       <div className="detail-page">
         <div className="detail-container">
           <div className="left-side-wrap">
-            <div className="preview-image">
-              <Slider {...settings}>
-                {images.map((image, index) => (
-                  <div key={index}>
-                    <img
-                      src={image.src}
-                      alt={`Image ${index}`}
-                      style={{ width: "100%", height: "auto" }}
-                    />
-                  </div>
-                ))}
-              </Slider>
-            </div>
+            {post?.images && post.images.length > 0 && (
+              <div className="preview-image">
+                <Slider {...settings}>
+                  {post.images.map((image, index) => (
+                    <div key={index}>
+                      <img
+                        src={image}
+                        alt={`Image ${index}`}
+                        style={{ width: "100%", height: "auto" }}
+                      />
+                    </div>
+                  ))}
+                </Slider>
+              </div>
+            )}
             <Chip
               label={post?.type === "buy" ? "Muốn nhận" : "Muốn cho"}
               variant="outlined"
@@ -74,8 +84,8 @@ const Detail: React.FC = () => {
               color={post?.type === "buy" ? "primary" : "secondary"}
               style={{ marginBottom: "16px" }}
             ></Chip>
-            <p className="title">{post?.name}</p>
-            <p className="description">{post?.info}</p>
+            <p className="title">{post?.title}</p>
+            <p className="description">{post?.petName}</p>
             <div className="pet-info">
               <p>
                 <span>
@@ -84,7 +94,7 @@ const Detail: React.FC = () => {
                   </IconButton>{" "}
                   Giống thú cưng:
                 </span>{" "}
-                {post?.category}
+                {post?.petType}
               </p>
               <p>
                 <span>
@@ -93,7 +103,7 @@ const Detail: React.FC = () => {
                   </IconButton>{" "}
                   Độ tuổi:
                 </span>{" "}
-                {post?.age}
+                {post?.age} tháng
               </p>
             </div>
             <p className="location">
@@ -103,7 +113,7 @@ const Detail: React.FC = () => {
                 </IconButton>{" "}
                 Địa chỉ:
               </span>{" "}
-              {post?.location}
+              {post?.address}
             </p>
           </div>
 
@@ -112,15 +122,14 @@ const Detail: React.FC = () => {
               <img
                 className="avatar"
                 width={32}
-                src={post?.profile.avatar}
-                alt=""
+                src={post?.profileImage || "https://i.pravatar.cc/100"}
+                alt="avatar"
               />
               <div className="profile-info">
-                <p className="name">{post?.profile.name}</p>
+                <p className="name">{post?.fullName}</p>
                 <p className="rating">
                   <img width={14} src="/icons/ico-rating.svg" alt="" />
-                  <span className="score"> {post?.profile.rate}</span> (
-                  {post?.profile.count} đánh giá)
+                  <span className="score"> 3.4</span> ( 12 đánh giá)
                 </p>
               </div>
             </div>
@@ -139,7 +148,7 @@ const Detail: React.FC = () => {
               color="primary"
               startIcon={<PhoneOutlinedIcon />}
             >
-              Liên hệ
+              Gửi yêu cầu
             </Button>
           </div>
         </div>

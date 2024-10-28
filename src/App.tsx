@@ -20,7 +20,7 @@ import Notification from "./pages/notification/Notification";
 import Profile from "./pages/profile/Profile";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Loading from "./components/loading/Loading";
-import NotificationItem from "./components/NotificationItem/NotificationItem";
+import NotificationItem from "./components/notification-item/NotificationItem";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("token");

@@ -15,6 +15,15 @@
 
       .preview-image {
         margin-bottom: 2.5rem;
+
+        .slick-slide {
+          max-height: 400px;
+
+          img {
+            max-height: 400px;
+            object-fit: cover;
+          }
+        }
       }
 
       .title {
@@ -88,7 +97,7 @@
             font-size: 12px;
 
             .score {
-                font-weight: 600;
+              font-weight: 600;
             }
           }
         }

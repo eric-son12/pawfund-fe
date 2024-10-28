@@ -24,6 +24,7 @@ export interface UsersActions {
   fetchUsers: () => Promise<void>;
   getVolunteerDetail: (userId: string) => Promise<LetterVolunteer>;
   confirmVolunteer: (userId: string) => Promise<boolean>;
+  deactivateUser: (userId: string) => Promise<void>;
 }
 
 export const initialUsers: UsersState = {
@@ -31,6 +32,8 @@ export const initialUsers: UsersState = {
 };
 
 export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
+  const BASE_URL = `http://103.151.239.114/api`;
+
   return {
     fetchUsers: async () => {
       set((state) => {
@@ -44,10 +47,7 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
           pageSize: 500,
           pageNumber: 1,
         };
-        const response = await axios.post(
-          "http://103.151.239.114/api/users/list",
-          body
-        );
+        const response = await axios.post(`${BASE_URL}/users/list`, body);
         const userList = response.data?.data?.list || undefined;
         set((state) => {
           state.users.users = userList;
@@ -67,7 +67,7 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
       });
       try {
         const response = await axios.post(
-          `http://103.151.239.114/api/volunteers/detail?userId=${userId}`
+          `${BASE_URL}/volunteers/detail?userId=${userId}`
         );
         const letter = response.data?.data || undefined;
         set((state) => {
@@ -91,10 +91,7 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
           volunteerId: userId,
           status: "Accept", //Waiting, Reject
         };
-        const response = await axios.post(
-          `http://103.151.239.114/api/volunteers/confirm`,
-          body
-        );
+        await axios.post(`${BASE_URL}/volunteers/confirm`, body);
         set((state) => {
           state.loading.isLoading = false;
         });
@@ -106,6 +103,23 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
           state.loading.isLoading = false;
         });
         return false;
+      }
+    },
+    deactivateUser: async (userId: string) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        await axios.post(`${BASE_URL}/users/deactivate?userId=${userId}`);
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.loading.error = message;
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
       }
     },
   };

@@ -43,7 +43,7 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
         state.loading.isLoading = true;
       });
       try {
-        const response = await axios.post(`${BASE_URL}/profile`);
+        const response = await axios.post(`${BASE_URL}/users/profile`);
         const profile = response.data?.data || undefined;
         set((state) => {
           state.profile.userProfile = profile;

@@ -36,14 +36,19 @@ const Dashboard: React.FC = () => {
   const users = useStore((store) => store.users.users);
   const fetchUsers = useStore((store) => store.fetchUsers);
 
+  const posts = useStore((store) => store.post.data);
+  const fetchPosts = useStore((store) => store.fetchPosts);
+
   const [showLetter, setShowLetter] = useState<boolean>(false);
   const [letter, setLeter] = useState<LetterVolunteer>();
   const fetchLetter = useStore((store) => store.getVolunteerDetail);
   const confirmVolunteer = useStore((store) => store.confirmVolunteer);
+  const deletePost = useStore((store) => store.deletePost);
+  const deactivateUser = useStore((store) => store.deactivateUser);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    type === "user" ? fetchUsers() : fetchPosts();
+  }, [type]);
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 50 },
@@ -89,6 +94,50 @@ const Dashboard: React.FC = () => {
     },
   ];
 
+  const columnsPost: GridColDef[] = [
+    { field: "id", headerName: "ID", width: 50 },
+    { field: "title", headerName: "Title", flex: 1 },
+    { field: "petName", headerName: "Pet Name", flex: 1 },
+    {
+      field: "petType",
+      headerName: "Pet Type",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "age",
+      headerName: "Age",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "address",
+      headerName: "Address",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "fullName",
+      headerName: "Full Name",
+      type: "string",
+    },
+    {
+      field: "action",
+      headerName: "",
+      width: 70,
+      renderCell: (params) => (
+        <div>
+          <IconButton
+            color="secondary"
+            onClick={() => handleClickOpen(params.row)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
+
   const paginationModel = { page: 0, pageSize: 10 };
 
   const handleClickOpen = (row: any) => {
@@ -99,11 +148,6 @@ const Dashboard: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
     setShowLetter(false);
-  };
-
-  const handleEditSubmit = () => {
-    console.log("Editing post:", selectedRow);
-    handleClose();
   };
 
   const showDetailVolunteer = async (id: string, row: any) => {
@@ -135,17 +179,17 @@ const Dashboard: React.FC = () => {
                 </ListSubheader>
               }
             >
-              <ListItemButton>
-                <ListItemIcon>
-                  <ArticleOutlinedIcon />
-                </ListItemIcon>
-                <ListItemText primary="Posts" />
-              </ListItemButton>
-              <ListItemButton>
+              <ListItemButton onClick={() => setType("user")}>
                 <ListItemIcon>
                   <PersonOutlineOutlinedIcon />
                 </ListItemIcon>
                 <ListItemText primary="Users" />
+              </ListItemButton>
+              <ListItemButton onClick={() => setType("post")}>
+                <ListItemIcon>
+                  <ArticleOutlinedIcon />
+                </ListItemIcon>
+                <ListItemText primary="Posts" />
               </ListItemButton>
             </List>
           </div>
@@ -158,8 +202,8 @@ const Dashboard: React.FC = () => {
             <div className="table-wrap">
               <Paper sx={{ height: "100%", width: "100%" }}>
                 <DataGrid
-                  rows={users}
-                  columns={columns}
+                  rows={type === "post" ? posts : users || []}
+                  columns={type === "post" ? columnsPost : columns}
                   initialState={{ pagination: { paginationModel } }}
                   pageSizeOptions={[5, 10]}
                   onRowClick={(row) => {
@@ -175,22 +219,28 @@ const Dashboard: React.FC = () => {
         </div>
 
         <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Do you want to ban this user?</DialogTitle>
+          <DialogTitle>
+            {type === "post" ? "Delete Post" : "Delete User"}
+          </DialogTitle>
           <DialogContent>
             <div>
               <p>
-                <span>ID: </span>
+                <span>Do you want to delete ID: </span>
                 {selectedRow?.id}
-              </p>
-              <p>
-                <span>Name: </span>
-                {selectedRow?.fullName}
               </p>
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleEditSubmit} color="primary">
-              Ban
+            <Button
+              onClick={() => {
+                type === "post"
+                  ? deletePost(selectedRow.id)
+                  : deactivateUser(selectedRow.id);
+                handleClose();
+              }}
+              color="primary"
+            >
+              Delete
             </Button>
             <Button onClick={handleClose} color="primary">
               Cancel
