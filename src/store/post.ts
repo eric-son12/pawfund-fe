@@ -2,14 +2,16 @@ import axios from "axios";
 import type { StoreGet, StoreSet } from "../store";
 import { Post } from "../components/card-post/CardPost";
 import { PostDetail } from "../pages/detail/Detail";
+import { Donate } from "../components/card-donate/CardDonate";
 
 export interface PostState {
   data: Post[];
   totalCount: number;
   history: Post[];
   totalCountHistory: number;
+  donate: Donate[];
+  totalCountDonate: number;
 }
-
 export interface CreatePostRequest {
   name: string;
   age: string;
@@ -67,6 +69,10 @@ export interface PostActions {
   deletePost: (id: number) => Promise<void>;
   updatePostGive: (id: number, statusCode: number) => Promise<void>;
   updatePostReceive: (id: number, statusCode: number) => Promise<void>;
+  fetchListDonate: () => Promise<void>;
+  fetchDonateDetail: (id: number) => Promise<Donate>;
+  createDonate: (values: any) => Promise<void>;
+  donateEvent: (id: number, amount: number) => Promise<void>;
 }
 
 export const initialPost: PostState = {
@@ -74,6 +80,8 @@ export const initialPost: PostState = {
   totalCount: 0,
   history: [],
   totalCountHistory: 0,
+  donate: [],
+  totalCountDonate: 0,
 };
 
 export function postActions(set: StoreSet, get: StoreGet): PostActions {
@@ -277,6 +285,96 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
           status: statusCode,
         };
         await axios.post(`${BASE_URL}/adopt/application/changeStatus`);
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.loading.error = message;
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    createDonate: async (values) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        await axios.post(`${BASE_URL}/event/create`, values);
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.loading.error = message;
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    fetchListDonate: async () => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        const body = {
+          title: "",
+          status: 0,
+          fromTarget: 0,
+          toTarget: 2000000,
+          pageSize: 100,
+          pageNumber: 1,
+        };
+        const response = await axios.post(`${BASE_URL}/event/filter`, body);
+        const listDonate = response.data?.data?.list || [];
+        const totalDonate = response.data?.data?.totalCount || 0;
+        set((state) => {
+          state.post.donate = listDonate;
+          state.post.totalCountDonate = totalDonate;
+        });
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.loading.error = message;
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    fetchDonateDetail: async (id) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/public/event/view?eventId=${id}`
+        );
+        const donateDetail = response.data?.data;
+        return donateDetail;
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.loading.error = message;
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    donateEvent: async (id, amount) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        const body = {
+          eventId: id,
+          amount: amount,
+        };
+        await axios.post(`${BASE_URL}/event/donate`, body);
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;

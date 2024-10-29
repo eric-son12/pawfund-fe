@@ -1,0 +1,13 @@
+.card-donate {
+  .MuiSlider-markLabel {
+    &[data-index="1"] {
+      left: 92% !important;
+    }
+  }
+
+  .status-label {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+}

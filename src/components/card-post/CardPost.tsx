@@ -91,10 +91,10 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
 
       <div className="action-wrap">
         <Chip
-          label={props.post.type === "buy" ? "Muốn nhận" : "Muốn cho"}
+          label={props.post.type != "1" ? "Muốn nhận" : "Muốn cho"}
           variant="outlined"
           size="small"
-          color={props.post.type === "buy" ? "primary" : "secondary"}
+          color={props.post.type != "1" ? "primary" : "secondary"}
         />
 
         {props.isOwner ? (

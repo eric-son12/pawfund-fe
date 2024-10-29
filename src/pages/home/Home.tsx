@@ -18,6 +18,7 @@ import { useStore } from "../../store";
 import Header from "../../components/header/Header";
 import CardPost from "../../components/card-post/CardPost";
 import Footer from "../../components/footer/Footer";
+import CardDonate from "../../components/card-donate/CardDonate";
 
 import "./Home.scss";
 
@@ -62,10 +63,13 @@ const Home: React.FC = () => {
   const fetchPosts = useStore((store) => store.fetchPosts);
   const posts = useStore((store) => store.post.data);
   const totalPost = useStore((store) => store.post.totalCount);
+  const donates = useStore((store) => store.post.donate);
+  const fetchDonates = useStore((store) => store.fetchListDonate);
 
   useEffect(() => {
     getPetType();
     fetchPosts();
+    fetchDonates();
   }, []);
 
   const getPetType = async () => {
@@ -123,6 +127,7 @@ const Home: React.FC = () => {
 
   const handleChangeCategory = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
+    fetchPosts(0, Number(event.target.value));
   };
 
   const clearFilter = () => {
@@ -177,7 +182,7 @@ const Home: React.FC = () => {
                 onChange={handleChangeCategory}
               >
                 {categories.map((category) => (
-                  <MenuItem key={category.id} value={category.name}>
+                  <MenuItem key={category.id} value={category.id}>
                     {category.name}
                   </MenuItem>
                 ))}
@@ -243,9 +248,7 @@ const Home: React.FC = () => {
             {posts.length === 0 && (
               <p style={{ textAlign: "center" }}>Post is empty.</p>
             )}
-          </div>
 
-          {posts.length > 0 && (
             <div>
               <TablePagination
                 component="div"
@@ -256,7 +259,15 @@ const Home: React.FC = () => {
                 onRowsPerPageChange={handleChangeRowsPerPage}
               />
             </div>
-          )}
+          </div>
+
+          <div className="list-donate">
+            {donates &&
+              donates.length > 0 &&
+              donates.map((donate, index) => (
+                <CardDonate key={index} donate={donate} />
+              ))}
+          </div>
         </div>
       </div>
 
