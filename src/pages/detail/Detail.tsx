@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import Slider from "react-slick";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import PetsOutlinedIcon from "@mui/icons-material/PetsOutlined";
 import CakeOutlinedIcon from "@mui/icons-material/CakeOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import ContactPageOutlinedIcon from "@mui/icons-material/ContactPageOutlined";
+import SendIcon from "@mui/icons-material/Send";
 import { Avatar, Button, Chip, IconButton } from "@mui/material";
 
 import { useStore } from "../../store";
@@ -28,6 +28,7 @@ export interface PostDetail {
   type: string;
   images: string[];
   application: any | null;
+  phone?: string;
 }
 
 const Detail: React.FC = () => {
@@ -41,6 +42,8 @@ const Detail: React.FC = () => {
   const fetchPetType = useStore((store) => store.fetchPetType);
   const postDetail = useStore((store) => store.postDetailFetch);
   const addNotification = useStore((store) => store.addNotification);
+
+  const isAuthenticated = !!localStorage.getItem("token");
 
   useEffect(() => {
     const getPostDetail = async () => {
@@ -189,10 +192,7 @@ const Detail: React.FC = () => {
               <Avatar>{post?.fullName.slice(0, 1)}</Avatar>
               <div className="profile-info">
                 <p className="name">{post?.fullName}</p>
-                <p className="rating">
-                  <img width={14} src="/icons/ico-rating.svg" alt="" />
-                  <span className="score"> N/a</span> ( 0 đánh giá)
-                </p>
+                <p className="rating">{post?.phone || "0909357281"}</p>
               </div>
             </div>
 
@@ -204,12 +204,12 @@ const Detail: React.FC = () => {
             >
               Xem thông tin
             </Button> */}
-            {post?.fullName !== profile?.fullName && (
+            {isAuthenticated && post?.fullName !== profile?.fullName && (
               <Button
                 fullWidth
                 variant="contained"
                 color="primary"
-                startIcon={<PhoneOutlinedIcon />}
+                startIcon={<SendIcon />}
                 onClick={handleRequest}
               >
                 Gửi yêu cầu

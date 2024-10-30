@@ -126,6 +126,12 @@ const CardDonate: React.FC<CardDonateProps> = (props: CardDonateProps) => {
               getAriaValueText={valuetext}
               marks={[
                 { value: 0, label: 0 },
+                {
+                  value:
+                    (props.donate.currentAmount / props.donate.targetAmount) *
+                    100,
+                  label: props.donate.currentAmount,
+                },
                 { value: 100, label: props.donate.targetAmount },
               ]}
               // valueLabelDisplay="on"
