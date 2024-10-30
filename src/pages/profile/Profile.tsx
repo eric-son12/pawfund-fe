@@ -11,6 +11,7 @@ import { UserProfile } from "../../store/profile";
 const Profile: React.FC = () => {
   const fetchProfile = useStore((store) => store.fetchProfile);
   const profile = useStore((store) => store.profile.userProfile);
+  const updateProfile = useStore((store) => store.updateProfile);
 
   const formik = useFormik<UserProfile>({
     initialValues: {
@@ -20,8 +21,15 @@ const Profile: React.FC = () => {
       address: "",
       username: "",
     },
-    onSubmit: (values) => {
-      console.log("Form values:", values);
+    onSubmit: async (values) => {
+      const body = {
+        fullName: values.fullName,
+        phone: values.phone,
+        address: values.address,
+        image: "",
+      };
+      await updateProfile(body);
+      await fetchProfile();
     },
   });
 
@@ -34,13 +42,6 @@ const Profile: React.FC = () => {
       formik.setValues(profile);
     }
   }, [profile]);
-
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const file = event.target.files;
-      formik.setFieldValue("avatar", file);
-    }
-  };
 
   return (
     <>
@@ -59,6 +60,7 @@ const Profile: React.FC = () => {
             </div>
             <TextField
               fullWidth
+              disabled={true}
               id="email"
               name="email"
               label="Email"

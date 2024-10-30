@@ -108,11 +108,13 @@ const CardDonate: React.FC<CardDonateProps> = (props: CardDonateProps) => {
           />
         </CardContent>
       </CardActionArea>
-      <CardActions sx={{ justifyContent: "flex-end" }}>
-        <Button size="small" color="primary">
-          Donate
-        </Button>
-      </CardActions>
+      {props.donate.status === 1 && (
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+          <Button size="small" color="primary">
+            Donate
+          </Button>
+        </CardActions>
+      )}
     </Card>
   );
 };

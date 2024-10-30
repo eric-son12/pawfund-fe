@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import Slider from "react-slick";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import PetsOutlinedIcon from "@mui/icons-material/PetsOutlined";
@@ -22,18 +23,22 @@ export interface PostDetail {
   age: number;
   address: string;
   fullName: string;
+  description: string;
   profileImage: string | null;
   type: string;
   images: string[];
-  application: number | null;
+  application: any | null;
 }
 
 const Detail: React.FC = () => {
   const navigate = useNavigate();
   const { slug } = useParams();
-  const postDetail = useStore((store) => store.postDetailFetch);
 
   const [post, setPost] = useState<PostDetail>();
+
+  const categories = useStore((store) => store.post.petType);
+  const fetchPetType = useStore((store) => store.fetchPetType);
+  const postDetail = useStore((store) => store.postDetailFetch);
 
   useEffect(() => {
     const getPostDetail = async () => {
@@ -41,6 +46,7 @@ const Detail: React.FC = () => {
       setPost(data);
     };
 
+    fetchPetType();
     getPostDetail();
   }, [slug]);
 
@@ -82,14 +88,35 @@ const Detail: React.FC = () => {
               </div>
             )}
             <Chip
-              label={post?.type === "buy" ? "Muốn nhận" : "Muốn cho"}
+              label={post?.type != "1" ? "Muốn nhận" : "Muốn cho"}
               variant="outlined"
               size="small"
-              color={post?.type === "buy" ? "primary" : "secondary"}
+              color={post?.type != "1" ? "primary" : "secondary"}
               style={{ marginBottom: "16px" }}
             ></Chip>
             <p className="title">{post?.title}</p>
-            <p className="description">{post?.petName}</p>
+            <p className="description">{post?.description}</p>
+            {post?.application != null && (
+              <>
+                <p className="description">
+                  <i>Kinh nghiệm:</i> {post?.application?.experience}
+                </p>
+                <p className="description">
+                  <i>Lý do muốn xin:</i> {post?.application?.reason}
+                </p>
+                <p className="description">
+                  <i>Chỗ nuôi:</i>{" "}
+                  {!!post?.application?.homeOwner ? "Có" : "Không"}
+                </p>
+                <p className="description">
+                  <i>Nuôi ở:</i> {post?.application?.houseType}
+                </p>
+                <p className="description">
+                  <i>Dị ứng:</i>{" "}
+                  {!!post?.application?.isAllregic ? "Có" : "Không"}
+                </p>
+              </>
+            )}
             <div className="pet-info">
               <p>
                 <span>
@@ -98,8 +125,20 @@ const Detail: React.FC = () => {
                   </IconButton>{" "}
                   Giống thú cưng:
                 </span>{" "}
-                {post?.petType}
+                {categories.find((item: any) => item.id == post?.petType)
+                  ?.name ?? "Pet"}
               </p>
+              <p>
+                <span>
+                  <IconButton>
+                    <PetsOutlinedIcon />
+                  </IconButton>{" "}
+                  Tên:
+                </span>{" "}
+                {post?.petName}
+              </p>
+            </div>
+            <div className="pet-info">
               <p>
                 <span>
                   <IconButton>
@@ -109,16 +148,16 @@ const Detail: React.FC = () => {
                 </span>{" "}
                 {post?.age} tháng
               </p>
+              <p className="location">
+                <span>
+                  <IconButton>
+                    <LocationOnOutlinedIcon />
+                  </IconButton>{" "}
+                  Địa chỉ:
+                </span>{" "}
+                {post?.address}
+              </p>
             </div>
-            <p className="location">
-              <span>
-                <IconButton>
-                  <LocationOnOutlinedIcon />
-                </IconButton>{" "}
-                Địa chỉ:
-              </span>{" "}
-              {post?.address}
-            </p>
           </div>
 
           <div className="right-side-wrap">

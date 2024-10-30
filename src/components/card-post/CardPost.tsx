@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, Button, Chip } from "@mui/material";
 import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined";
 import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+import { useStore } from "../../store";
 
 import "./CardPost.scss";
 
@@ -36,6 +39,8 @@ interface CardPostProps {
 
 const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
   const navigate = useNavigate();
+
+  const deletePost = useStore((store) => store.deletePost);
 
   return (
     <div
@@ -98,13 +103,24 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
         />
 
         {props.isOwner ? (
-          <Button
-            variant="contained"
-            startIcon={<EditOutlinedIcon />}
-            onClick={() => navigate(`/edit-post/${props.post.id}`)}
-          >
-            Chỉnh sửa
-          </Button>
+          <div>
+            <Button
+              variant="contained"
+              startIcon={<EditOutlinedIcon />}
+              onClick={() => navigate(`/edit-post/${props.post.id}`)}
+              style={{ marginRight: "10px" }}
+            >
+              Chỉnh sửa
+            </Button>
+            <Button
+              color="error"
+              variant="contained"
+              startIcon={<DeleteIcon />}
+              onClick={() => deletePost(props.post.id)}
+            >
+              Xóa bài
+            </Button>
+          </div>
         ) : (
           <Button variant="contained" startIcon={<PhoneOutlinedIcon />}>
             Liên hệ

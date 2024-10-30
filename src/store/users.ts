@@ -23,7 +23,10 @@ export interface LetterVolunteer {
 export interface UsersActions {
   fetchUsers: () => Promise<void>;
   getVolunteerDetail: (userId: string) => Promise<LetterVolunteer>;
-  confirmVolunteer: (userId: string) => Promise<boolean>;
+  confirmVolunteer: (
+    userId: string,
+    status: "Accept" | "Reject"
+  ) => Promise<boolean>;
   deactivateUser: (userId: string) => Promise<void>;
 }
 
@@ -32,7 +35,7 @@ export const initialUsers: UsersState = {
 };
 
 export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
-  const BASE_URL = `http://103.151.239.114/api`;
+  const BASE_URL = `https://spacesport.pro/api`;
 
   return {
     fetchUsers: async () => {
@@ -51,12 +54,17 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
         const userList = response.data?.data?.list || undefined;
         set((state) => {
           state.users.users = userList;
-          state.loading.isLoading = false;
         });
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
@@ -70,39 +78,51 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
           `${BASE_URL}/volunteers/detail?userId=${userId}`
         );
         const letter = response.data?.data || undefined;
-        set((state) => {
-          state.loading.isLoading = false;
-        });
         return letter;
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
     },
-    confirmVolunteer: async (userId: string) => {
+    confirmVolunteer: async (userId, status) => {
       set((state) => {
         state.loading.isLoading = true;
       });
       try {
         const body = {
           volunteerId: userId,
-          status: "Accept", //Waiting, Reject
+          status: status, //Waiting, Reject
         };
         await axios.post(`${BASE_URL}/volunteers/confirm`, body);
         set((state) => {
-          state.loading.isLoading = false;
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: "Change application volunteer successfully",
+          });
         });
         return true;
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
-          state.loading.isLoading = false;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
         });
         return false;
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
       }
     },
     deactivateUser: async (userId: string) => {
@@ -111,10 +131,19 @@ export function usersActions(set: StoreSet, get: StoreGet): UsersActions {
       });
       try {
         await axios.post(`${BASE_URL}/users/deactivate?userId=${userId}`);
+        set((state) => {
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: "Deactivate user successfully",
+          });
+        });
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
         });
       } finally {
         set((state) => {

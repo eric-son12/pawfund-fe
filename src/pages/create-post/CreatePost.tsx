@@ -12,7 +12,6 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import axios from "axios";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import AddIcon from "@mui/icons-material/Add";
@@ -22,13 +21,10 @@ import { CreatePostReceiveRequest, CreatePostRequest } from "../../store/post";
 import Header from "../../components/header/Header";
 
 import "./CreatePost.scss";
-
-interface ICategory {
-  id: number;
-  name: string;
-}
+import { PROVINCES } from "../home/Home";
 
 interface IPostForm {
+  petTypeId: number;
   category: string;
   name: string;
   age: number;
@@ -45,31 +41,22 @@ interface IPostForm {
 }
 
 const CreatePost: React.FC = () => {
-  const [categories, setCategories] = useState<ICategory[]>([]);
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+
+  const categories = useStore((store) => store.post.petType);
+  const fetchPetType = useStore((store) => store.fetchPetType);
   const createPost = useStore((store) => store.createPost);
   const createPostReceive = useStore((store) => store.createPostReceive);
   const addNotification = useStore((store) => store.addNotification);
 
   useEffect(() => {
     setSelectedImages([]);
-    getPetType();
+    fetchPetType();
   }, []);
-
-  const getPetType = async () => {
-    const url = "http://103.151.239.114/api/public/pet/type/dropdown";
-
-    try {
-      const response = await axios.post(url);
-      const categories = response.data?.data || [];
-      setCategories(categories);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const formik = useFormik<IPostForm>({
     initialValues: {
+      petTypeId: 0,
       category: "",
       name: "",
       age: 0,
@@ -106,6 +93,7 @@ const CreatePost: React.FC = () => {
         breed: values.category,
         imageUrl: selectedImages,
         name: values.name,
+        petTypeId: categories.find((c) => c.name == values.category)?.id || 1,
       };
       const createPostReceiveBody: CreatePostReceiveRequest = {
         age: values.age.toString(),
@@ -125,10 +113,7 @@ const CreatePost: React.FC = () => {
         ? await createPost(createPostBody)
         : await createPostReceive(createPostReceiveBody);
       formik.resetForm();
-      addNotification({
-        content: "Post created successfully",
-        status: "SUCCESS",
-      });
+      setSelectedImages([]);
     },
   });
 
@@ -292,7 +277,26 @@ const CreatePost: React.FC = () => {
               style={{ marginBottom: "16px" }}
             />
 
-            <TextField
+            <FormControl fullWidth style={{ marginBottom: "16px" }}>
+              <InputLabel>Khu vực</InputLabel>
+              <Select
+                id="location"
+                name="location"
+                label="Khu vực"
+                value={formik.values.location}
+                onChange={formik.handleChange}
+                error={
+                  formik.touched.location && Boolean(formik.errors.location)
+                }
+              >
+                {PROVINCES.map((location, index) => (
+                  <MenuItem key={index} value={location}>
+                    {location}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {/* <TextField
               fullWidth
               id="location"
               name="location"
@@ -303,7 +307,7 @@ const CreatePost: React.FC = () => {
               error={formik.touched.location && Boolean(formik.errors.location)}
               helperText={formik.touched.location && formik.errors.location}
               style={{ marginBottom: "16px" }}
-            />
+            /> */}
 
             {formik.values.type !== "give" && (
               <>

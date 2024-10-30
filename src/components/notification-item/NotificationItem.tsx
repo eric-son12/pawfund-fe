@@ -23,7 +23,7 @@ const NotificationItem: React.FC = () => {
     <Snackbar
       anchorOrigin={{ vertical: "top", horizontal: "center" }}
       open={open}
-      autoHideDuration={3000}
+      autoHideDuration={5000}
       onClose={() => setOpen(false)}
     >
       {item?.status === "ERROR" ? (

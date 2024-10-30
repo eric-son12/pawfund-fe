@@ -39,6 +39,7 @@ const Header: React.FC = () => {
 
   const navigate = useNavigate();
   const logout = useStore((store) => store.logout);
+  const setSearchKeyword = useStore((store) => store.setSearchKeyword);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -87,6 +88,7 @@ const Header: React.FC = () => {
             style={{ color: "white", fontSize: "14px" }}
             placeholder="Tìm kiếm bài viết..."
             variant="outlined"
+            onChange={(e) => setSearchKeyword(e.target.value)}
             slotProps={{
               input: {
                 startAdornment: (

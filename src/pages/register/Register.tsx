@@ -53,7 +53,6 @@ const Register: React.FC = () => {
 
   const formikVolunteer = useFormik({
     initialValues: {
-      username: "",
       fullName: "",
       gender: "",
       phone: "",
@@ -76,7 +75,6 @@ const Register: React.FC = () => {
       experience: Yup.string().required("Experience is required"),
       currentJob: Yup.string().required("Current Job is required"),
       reason: Yup.string().required("Reason Job is required"),
-      username: Yup.string().required("Username is required"),
       email: Yup.string()
         .email("Invalid email address")
         .required("Email is required"),
@@ -86,6 +84,8 @@ const Register: React.FC = () => {
     }),
     onSubmit: (values) => {
       console.log("Sign-up volunteer form values:", values);
+      let body: any = values;
+      body["username"] = values.email;
       register(values, registerType);
     },
   });
@@ -410,27 +410,6 @@ const Register: React.FC = () => {
                 helperText={
                   formikVolunteer.touched.reason &&
                   formikVolunteer.errors.reason
-                }
-              />
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <TextField
-                fullWidth
-                id="username"
-                name="username"
-                label="Username"
-                variant="outlined"
-                value={formikVolunteer.values.username}
-                onChange={formikVolunteer.handleChange}
-                onBlur={formikVolunteer.handleBlur}
-                error={
-                  formikVolunteer.touched.username &&
-                  Boolean(formikVolunteer.errors.username)
-                }
-                helperText={
-                  formikVolunteer.touched.username &&
-                  formikVolunteer.errors.username
                 }
               />
             </div>

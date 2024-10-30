@@ -22,6 +22,7 @@ export interface ProfileState {
 
 export interface ProfileActions {
   fetchProfile: () => Promise<void>;
+  updateProfile: (values: any) => Promise<void>;
   register: (userBody: any, type: string) => Promise<void>;
   login: (username: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -35,7 +36,7 @@ export const initialProfile: ProfileState = {
 };
 
 export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
-  const BASE_URL = "http://103.151.239.114/api";
+  const BASE_URL = "https://spacesport.pro/api";
 
   return {
     fetchProfile: async () => {
@@ -47,12 +48,49 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
         const profile = response.data?.data || undefined;
         set((state) => {
           state.profile.userProfile = profile;
-          state.loading.isLoading = false;
         });
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    updateProfile: async (values) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        const response = await axios.post(
+          `${BASE_URL}/users/profile/update`,
+          values
+        );
+        const profile = response.data?.data || undefined;
+        console.log("PRO", profile);
+        set((state) => {
+          // state.profile.userProfile = profile;
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: "Update profile successfully",
+          });
+        });
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
@@ -76,16 +114,27 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
         const message = response?.data?.message;
         set((state) => {
           if (status === "USER_ALREADY_EXIST") {
-            state.loading.error = message;
+            state.notification.data.push({
+              status: "ERROR",
+              content: message,
+            });
           } else {
-            // TODO: Notify
+            state.notification.data.push({
+              status: "SUCCESS",
+              content: "Register successfully",
+            });
           }
-          state.loading.isLoading = false;
         });
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
@@ -106,7 +155,6 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
         }
         set((state) => {
           state.profile.user = user;
-          state.loading.isLoading = false;
           state.notification.data.push({
             content: response.data.message,
             status: "SUCCESS",
@@ -115,7 +163,13 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.profile.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
@@ -131,7 +185,6 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
             localStorage.setItem("token", "");
             state.profile.user = undefined;
           }
-          state.loading.isLoading = false;
           state.notification.data.push({
             content: response.data.message,
             status: "SUCCESS",
@@ -140,7 +193,13 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }
@@ -155,17 +214,23 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
           newPassword: newPassword,
           confirmPassword: newPassword,
         };
-        const response = await axios.post(
-          `${BASE_URL}/users/changePassword`,
-          body
-        );
+        await axios.post(`${BASE_URL}/users/changePassword`, body);
         set((state) => {
-          state.loading.isLoading = false;
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: "Change password successfully",
+          });
         });
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;
-          state.loading.error = message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
           state.loading.isLoading = false;
         });
       }

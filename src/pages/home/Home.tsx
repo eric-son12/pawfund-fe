@@ -11,7 +11,6 @@ import {
   TablePagination,
   Tabs,
 } from "@mui/material";
-import axios from "axios";
 import ClearIcon from "@mui/icons-material/Clear";
 
 import { useStore } from "../../store";
@@ -21,6 +20,72 @@ import Footer from "../../components/footer/Footer";
 import CardDonate from "../../components/card-donate/CardDonate";
 
 import "./Home.scss";
+
+export const PROVINCES = [
+  "An Giang",
+  "Bà Rịa - Vũng Tàu",
+  "Bạc Liêu",
+  "Bắc Kạn",
+  "Bắc Giang",
+  "Bắc Ninh",
+  "Bến Tre",
+  "Bình Dương",
+  "Bình Định",
+  "Bình Phước",
+  "Bình Thuận",
+  "Cà Mau",
+  "Cao Bằng",
+  "Cần Thơ",
+  "Đà Nẵng",
+  "Đắk Lắk",
+  "Đắk Nông",
+  "Điện Biên",
+  "Đồng Nai",
+  "Đồng Tháp",
+  "Gia Lai",
+  "Hà Giang",
+  "Hà Nam",
+  "Hà Nội",
+  "Hà Tĩnh",
+  "Hải Dương",
+  "Hải Phòng",
+  "Hậu Giang",
+  "Hòa Bình",
+  "Hưng Yên",
+  "Khánh Hòa",
+  "Kiên Giang",
+  "Kon Tum",
+  "Lai Châu",
+  "Lạng Sơn",
+  "Lào Cai",
+  "Lâm Đồng",
+  "Long An",
+  "Nam Định",
+  "Nghệ An",
+  "Ninh Bình",
+  "Ninh Thuận",
+  "Phú Thọ",
+  "Phú Yên",
+  "Quảng Bình",
+  "Quảng Nam",
+  "Quảng Ngãi",
+  "Quảng Ninh",
+  "Quảng Trị",
+  "Sóc Trăng",
+  "Sơn La",
+  "Tây Ninh",
+  "Thái Bình",
+  "Thái Nguyên",
+  "Thanh Hóa",
+  "Thừa Thiên Huế",
+  "Tiền Giang",
+  "Hồ Chí Minh",
+  "Trà Vinh",
+  "Tuyên Quang",
+  "Vĩnh Long",
+  "Vĩnh Phúc",
+  "Yên Bái",
+];
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -54,12 +119,14 @@ const a11yProps = (index: number) => {
 const Home: React.FC = () => {
   const [location, setLoation] = useState<string>("");
   const [category, setCategory] = useState<string>("");
-  const [categories, setCategories] = useState<any[]>([]);
   const [age, setAge] = useState<string>("");
   const [type, setType] = useState<number>(0);
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [searchResult, setSearchResult] = useState<any>([]);
 
+  const searchKeyword = useStore((store) => store.post.searchKeyword);
+  const categories = useStore((store) => store.post.petType);
   const fetchPosts = useStore((store) => store.fetchPosts);
   const posts = useStore((store) => store.post.data);
   const totalPost = useStore((store) => store.post.totalCount);
@@ -67,37 +134,28 @@ const Home: React.FC = () => {
   const fetchDonates = useStore((store) => store.fetchListDonate);
 
   useEffect(() => {
-    getPetType();
-    fetchPosts();
+    fetchPosts(0, 0, 0, 0, "", 2);
     fetchDonates();
   }, []);
 
-  const getPetType = async () => {
-    const url = "http://103.151.239.114/api/public/pet/type/dropdown";
-
-    try {
-      const response = await axios.post(url);
-      const categories = response.data?.data || [];
-      setCategories(categories);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  useEffect(() => {
+    if (searchKeyword) handleSearchPost(searchKeyword);
+  }, [searchKeyword]);
 
   const handleChangeTabs = (event: React.SyntheticEvent, newValue: number) => {
     setType(newValue);
     switch (newValue) {
       case 0:
-        fetchPosts();
+        fetchPosts(0, 0, 0, 0, "", 2);
         break;
       case 1:
-        fetchPosts(1);
+        fetchPosts(1, 0, 0, 0, "", 2);
         break;
       case 2:
-        fetchPosts(2);
+        fetchPosts(2, 0, 0, 0, "", 2);
         break;
       default:
-        fetchPosts();
+        fetchPosts(0, 0, 0, 0, "", 2);
         break;
     }
   };
@@ -106,13 +164,13 @@ const Home: React.FC = () => {
     setAge(event.target.value as string);
     switch (event.target.value) {
       case "1-5":
-        fetchPosts(0, 0, 1, 5);
+        fetchPosts(type, Number(category), 1, 5, location, 2);
         break;
       case "5-12":
-        fetchPosts(0, 0, 5, 12);
+        fetchPosts(type, Number(category), 5, 12, location, 2);
         break;
       case "12+":
-        fetchPosts(0, 0, 12, 99);
+        fetchPosts(type, Number(category), 12, 99, location, 2);
         break;
       default:
         fetchPosts();
@@ -122,19 +180,30 @@ const Home: React.FC = () => {
 
   const handleChangeLocation = (event: SelectChangeEvent) => {
     setLoation(event.target.value as string);
-    fetchPosts(0, 0, 0, 0, event.target.value);
+    fetchPosts(type, Number(category), 0, 0, event.target.value, 2);
   };
 
   const handleChangeCategory = (event: SelectChangeEvent) => {
     setCategory(event.target.value as string);
-    fetchPosts(0, Number(event.target.value));
+    fetchPosts(type, Number(event.target.value), 0, 0, location, 2);
   };
 
   const clearFilter = () => {
     setLoation("");
     setCategory("");
     setAge("");
-    fetchPosts();
+    fetchPosts(0, 0, 0, 0, "", 2);
+  };
+
+  const handleSearchPost = (keyword: string) => {
+    const search = posts.filter(
+      (post: any) => post.petName.toLowerCase().indexOf(keyword) > -1
+    );
+    if (search.length > 0) {
+      setSearchResult(search);
+    } else {
+      setSearchResult([]);
+    }
   };
 
   const handleChangePage = (
@@ -167,9 +236,11 @@ const Home: React.FC = () => {
                 label="Khu vực"
                 onChange={handleChangeLocation}
               >
-                <MenuItem value={"Hồ chí minh"}>Hồ chí minh</MenuItem>
-                <MenuItem value={"Đà nẵng"}>Đà nẵng</MenuItem>
-                <MenuItem value={"Hà nội"}>Hà nội</MenuItem>
+                {PROVINCES.map((province, index) => (
+                  <MenuItem key={index} value={province}>
+                    {province}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
             <FormControl size="small" fullWidth>
@@ -217,48 +288,62 @@ const Home: React.FC = () => {
 
         <div className="home-container">
           <div className="news-feed">
-            <div className="category-wrap">
-              <Tabs
-                style={{ background: "white", marginBottom: "4px" }}
-                value={type}
-                onChange={handleChangeTabs}
-                aria-label="basic tabs example"
-              >
-                <Tab label="Tất cả" {...a11yProps(0)} />
-                <Tab label="Muốn cho" {...a11yProps(1)} />
-                <Tab label="Muốn nhận" {...a11yProps(2)} />
-              </Tabs>
-            </div>
-            <CustomTabPanel value={type} index={0}>
-              {posts &&
-                posts.length > 0 &&
-                posts.map((post) => <CardPost key={post.id} post={post} />)}
-            </CustomTabPanel>
-            <CustomTabPanel value={type} index={1}>
-              {posts &&
-                posts.length > 0 &&
-                posts.map((post) => <CardPost key={post.id} post={post} />)}
-            </CustomTabPanel>
-            <CustomTabPanel value={type} index={2}>
-              {posts &&
-                posts.length > 0 &&
-                posts.map((post) => <CardPost key={post.id} post={post} />)}
-            </CustomTabPanel>
+            {searchKeyword ? (
+              searchResult.length > 0 ? (
+                searchResult &&
+                searchResult.length > 0 &&
+                searchResult.map((post: any) => (
+                  <CardPost key={post.id} post={post} />
+                ))
+              ) : (
+                <p style={{ textAlign: "center" }}>Post is empty.</p>
+              )
+            ) : (
+              <>
+                <div className="category-wrap">
+                  <Tabs
+                    style={{ background: "white", marginBottom: "4px" }}
+                    value={type}
+                    onChange={handleChangeTabs}
+                    aria-label="basic tabs example"
+                  >
+                    <Tab label="Tất cả" {...a11yProps(0)} />
+                    <Tab label="Muốn cho" {...a11yProps(1)} />
+                    <Tab label="Muốn nhận" {...a11yProps(2)} />
+                  </Tabs>
+                </div>
+                <CustomTabPanel value={type} index={0}>
+                  {posts &&
+                    posts.length > 0 &&
+                    posts.map((post) => <CardPost key={post.id} post={post} />)}
+                </CustomTabPanel>
+                <CustomTabPanel value={type} index={1}>
+                  {posts &&
+                    posts.length > 0 &&
+                    posts.map((post) => <CardPost key={post.id} post={post} />)}
+                </CustomTabPanel>
+                <CustomTabPanel value={type} index={2}>
+                  {posts &&
+                    posts.length > 0 &&
+                    posts.map((post) => <CardPost key={post.id} post={post} />)}
+                </CustomTabPanel>
 
-            {posts.length === 0 && (
-              <p style={{ textAlign: "center" }}>Post is empty.</p>
+                {posts.length === 0 && (
+                  <p style={{ textAlign: "center" }}>Post is empty.</p>
+                )}
+
+                <div>
+                  <TablePagination
+                    component="div"
+                    count={totalPost}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </div>
+              </>
             )}
-
-            <div>
-              <TablePagination
-                component="div"
-                count={totalPost}
-                page={page}
-                onPageChange={handleChangePage}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-              />
-            </div>
           </div>
 
           <div className="list-donate">

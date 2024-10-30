@@ -7,6 +7,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Fab,
   FormControl,
   FormLabel,
   IconButton,
@@ -30,6 +31,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import AddIcon from "@mui/icons-material/Add";
+import Diversity2Icon from "@mui/icons-material/Diversity2";
 
 import { useStore } from "../../../store";
 import { LetterVolunteer } from "../../../store/users";
@@ -52,13 +54,19 @@ const Dashboard: React.FC = () => {
   const [type, setType] = useState<"user" | "post" | "donate">("user");
   const [open, setOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<any>(null);
+  const [selectedRowPost, setSelectedRowPost] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string>("");
+  const [openChangeStatus, setOpenChangeStatus] = useState(false);
+  const [openCreateDonate, setOpenCreateDonate] = useState(false);
 
   const users = useStore((store) => store.users.users);
   const fetchUsers = useStore((store) => store.fetchUsers);
 
   const posts = useStore((store) => store.post.data);
   const fetchPosts = useStore((store) => store.fetchPosts);
+
+  const donates = useStore((store) => store.post.donate);
+  const fetchDonate = useStore((store) => store.fetchListDonate);
 
   const createDonation = useStore((store) => store.createDonate);
 
@@ -68,10 +76,12 @@ const Dashboard: React.FC = () => {
   const confirmVolunteer = useStore((store) => store.confirmVolunteer);
   const deletePost = useStore((store) => store.deletePost);
   const deactivateUser = useStore((store) => store.deactivateUser);
+  const updateStatusPost = useStore((store) => store.updatePostStatusGive);
 
   useEffect(() => {
     if (type === "user") fetchUsers();
     if (type === "post") fetchPosts();
+    if (type === "donate") fetchDonate();
   }, [type]);
 
   const columns: GridColDef[] = [
@@ -93,6 +103,12 @@ const Dashboard: React.FC = () => {
     {
       field: "role",
       headerName: "Role",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "statusApplication",
+      headerName: "Status Application",
       type: "string",
       flex: 1,
     },
@@ -136,7 +152,7 @@ const Dashboard: React.FC = () => {
       field: "age",
       headerName: "Age",
       type: "string",
-      flex: 1,
+      width: 70,
     },
     {
       field: "address",
@@ -150,16 +166,106 @@ const Dashboard: React.FC = () => {
       type: "string",
     },
     {
+      field: "status",
+      headerName: "Status",
+      type: "string",
+      flex: 1,
+      renderCell: (params) => (
+        <div>
+          {params.row.status === 1
+            ? "Pending"
+            : params.row.status === 2
+            ? "Available"
+            : params.row.status === 3
+            ? "Review"
+            : params.row.status === 4
+            ? "Approved"
+            : "Rejected"}
+        </div>
+      ),
+    },
+    {
+      field: "action",
+      headerName: "",
+      flex: 1,
+      renderCell: (params) => (
+        <div>
+          <IconButton
+            color="primary"
+            onClick={() => handleOpenChangeStatus(params.row)}
+          >
+            <ArticleOutlinedIcon />
+          </IconButton>
+          <IconButton
+            color="secondary"
+            onClick={() => handleClickOpen(params.row)}
+          >
+            <DeleteIcon />
+          </IconButton>
+        </div>
+      ),
+    },
+  ];
+
+  const columnsDonate: GridColDef[] = [
+    { field: "id", headerName: "ID", width: 50 },
+    { field: "title", headerName: "Title", flex: 1 },
+    { field: "description", headerName: "Description", flex: 1 },
+    {
+      field: "startDate",
+      headerName: "Start Date",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "endDate",
+      headerName: "End Date",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "targetAmount",
+      headerName: "Target Amount",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "currentAmount",
+      headerName: "Current Amount",
+      type: "string",
+      flex: 1,
+    },
+    {
+      field: "status",
+      headerName: "Status",
+      type: "string",
+      renderCell: (params) => (
+        <div>
+          {params.row.status === 1
+            ? "In Progress"
+            : params.row.status === 2
+            ? "Completed"
+            : params.row.status === 3
+            ? "UnCompleted"
+            : "Cancel"}
+        </div>
+      ),
+    },
+    {
       field: "action",
       headerName: "",
       width: 70,
       renderCell: (params) => (
         <div>
           <IconButton
-            color="secondary"
-            onClick={() => handleClickOpen(params.row)}
+            color="primary"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleClickOpen(params.row);
+            }}
           >
-            <DeleteIcon />
+            <ArticleOutlinedIcon />
           </IconButton>
         </div>
       ),
@@ -193,8 +299,21 @@ const Dashboard: React.FC = () => {
     onSubmit: (values: any) => {
       console.log("Form values:", values);
       createDonation(values);
+      fetchDonate();
     },
   });
+
+  const handleUpdateStatus = async (status: number) => {
+    const { id } = selectedRowPost;
+    await updateStatusPost(id, status);
+    await fetchPosts();
+    setOpenChangeStatus(false);
+  };
+
+  const handleOpenChangeStatus = (row: any) => {
+    setSelectedRowPost(row);
+    setOpenChangeStatus(true);
+  };
 
   const handleClickOpen = (row: any) => {
     setSelectedRow(row);
@@ -204,6 +323,8 @@ const Dashboard: React.FC = () => {
   const handleClose = () => {
     setOpen(false);
     setShowLetter(false);
+    setOpenChangeStatus(false);
+    setOpenCreateDonate(false);
   };
 
   const showDetailVolunteer = async (id: string, row: any) => {
@@ -213,10 +334,11 @@ const Dashboard: React.FC = () => {
     !_.isEmpty(letterDetail) && setShowLetter(true);
   };
 
-  const handleConfirmVolunteer = async () => {
+  const handleConfirmVolunteer = async (status: "Accept" | "Reject") => {
     const { id } = selectedRow;
-    const res = await confirmVolunteer(id);
+    const res = await confirmVolunteer(id, status);
     res && setShowLetter(false);
+    await fetchUsers();
   };
 
   const handleImageChange = async (
@@ -283,198 +405,62 @@ const Dashboard: React.FC = () => {
               </ListItemButton>
               <ListItemButton onClick={() => setType("donate")}>
                 <ListItemIcon>
-                  <BorderColorIcon />
+                  <Diversity2Icon />
                 </ListItemIcon>
-                <ListItemText primary="Create Donation" />
+                <ListItemText primary="Donation" />
               </ListItemButton>
             </List>
           </div>
 
           <div className="content">
             <h1 className="title">
-              {type === "donate"
-                ? "Tạo bài đăng donate"
-                : `Quản lý ${type === "post" ? "bài đăng" : "người dùng"}`}
+              {`Quản lý ${
+                type === "post"
+                  ? "bài đăng"
+                  : type === "user"
+                  ? "người dùng"
+                  : "donate"
+              }`}
             </h1>
 
-            {type === "donate" ? (
-              <div>
-                <form
-                  onSubmit={formik.handleSubmit}
-                  style={{ maxWidth: "500px", margin: "0 auto" }}
-                >
-                  <TextField
-                    fullWidth
-                    id="title"
-                    name="title"
-                    label="Title"
-                    value={formik.values.title}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={formik.touched.title && Boolean(formik.errors.title)}
-                    helperText={formik.touched.title && formik.errors.title}
-                    margin="normal"
-                  />
-
-                  <TextField
-                    fullWidth
-                    id="description"
-                    name="description"
-                    label="Description"
-                    value={formik.values.description}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.description &&
-                      Boolean(formik.errors.description)
+            <div className="table-wrap">
+              <Paper sx={{ height: "100%", width: "100%" }}>
+                <DataGrid
+                  rows={
+                    type === "post"
+                      ? posts
+                      : type === "user"
+                      ? users
+                      : donates || []
+                  }
+                  columns={
+                    type === "post"
+                      ? columnsPost
+                      : type === "user"
+                      ? columns
+                      : columnsDonate
+                  }
+                  initialState={{ pagination: { paginationModel } }}
+                  pageSizeOptions={[5, 10]}
+                  onRowClick={(row) => {
+                    if (row.row.role === "VOLUNTEER") {
+                      showDetailVolunteer(row.row.id, row);
                     }
-                    helperText={
-                      formik.touched.description && formik.errors.description
-                    }
-                    margin="normal"
-                    multiline
-                    rows={4}
-                  />
-
-                  <TextField
-                    fullWidth
-                    id="targetAmount"
-                    name="targetAmount"
-                    label="Target Amount"
-                    type="number"
-                    value={formik.values.targetAmount}
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    error={
-                      formik.touched.targetAmount &&
-                      Boolean(formik.errors.targetAmount)
-                    }
-                    helperText={
-                      formik.touched.targetAmount && formik.errors.targetAmount
-                    }
-                    margin="normal"
-                  />
-
-                  <div style={{ marginTop: "16px", marginBottom: "8px" }}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="Start Date"
-                        value={
-                          formik.values.startDate
-                            ? dayjs(formik.values.startDate)
-                            : null
-                        }
-                        onChange={(newValue) => {
-                          formik.setFieldValue(
-                            "startDate",
-                            newValue ? newValue.format("YYYY-MM-DD") : ""
-                          );
-                        }}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            id: "startDate",
-                            name: "startDate",
-                            onBlur: formik.handleBlur,
-                            error:
-                              formik.touched.startDate &&
-                              Boolean(formik.errors.startDate),
-                            helperText:
-                              formik.touched.startDate &&
-                              formik.errors.startDate,
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </div>
-
-                  <div style={{ marginTop: "16px", marginBottom: "8px" }}>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                      <DatePicker
-                        label="End Date"
-                        value={
-                          formik.values.endDate
-                            ? dayjs(formik.values.endDate)
-                            : null
-                        }
-                        onChange={(newValue) => {
-                          formik.setFieldValue(
-                            "endDate",
-                            newValue ? newValue.format("YYYY-MM-DD") : ""
-                          );
-                        }}
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                            id: "endDate",
-                            name: "endDate",
-                            onBlur: formik.handleBlur,
-                            error:
-                              formik.touched.endDate &&
-                              Boolean(formik.errors.endDate),
-                            helperText:
-                              formik.touched.endDate && formik.errors.endDate,
-                          },
-                        }}
-                      />
-                    </LocalizationProvider>
-                  </div>
-
-                  <FormControl fullWidth style={{ marginBottom: "16px" }}>
-                    <FormLabel
-                      component="legend"
-                      style={{ marginBottom: "8px" }}
-                    >
-                      Hình ảnh
-                    </FormLabel>
-                    <div className="gallery-photo">
-                      {selectedImage && (
-                        <div className="gallery-item">
-                          <img src={selectedImage} alt={"image donate"} />
-                        </div>
-                      )}
-                      <div className="upload-image">
-                        <Button variant="text" component="label">
-                          <AddIcon fontSize="large" />
-                          <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={handleImageChange}
-                          />
-                        </Button>
-                      </div>
-                    </div>
-                  </FormControl>
-
-                  <Button
-                    color="primary"
-                    variant="contained"
-                    fullWidth
-                    type="submit"
-                    style={{ marginTop: "16px" }}
-                  >
-                    Submit
-                  </Button>
-                </form>
-              </div>
-            ) : (
-              <div className="table-wrap">
-                <Paper sx={{ height: "100%", width: "100%" }}>
-                  <DataGrid
-                    rows={type === "post" ? posts : users || []}
-                    columns={type === "post" ? columnsPost : columns}
-                    initialState={{ pagination: { paginationModel } }}
-                    pageSizeOptions={[5, 10]}
-                    onRowClick={(row) => {
-                      if (row.row.role === "VOLUNTEER") {
-                        showDetailVolunteer(row.row.id, row);
-                      }
-                    }}
-                    sx={{ border: 0 }}
-                  />
-                </Paper>
-              </div>
+                  }}
+                  sx={{ border: 0 }}
+                />
+              </Paper>
+            </div>
+            {type === "donate" && (
+              <Fab
+                size="medium"
+                className="add-donate"
+                color="primary"
+                aria-label="add"
+                onClick={() => setOpenCreateDonate(true)}
+              >
+                <AddIcon />
+              </Fab>
             )}
           </div>
         </div>
@@ -493,10 +479,11 @@ const Dashboard: React.FC = () => {
           </DialogContent>
           <DialogActions>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 type === "post"
                   ? deletePost(selectedRow.id)
                   : deactivateUser(selectedRow.id);
+                await fetchUsers();
                 handleClose();
               }}
               color="primary"
@@ -546,9 +533,251 @@ const Dashboard: React.FC = () => {
             </div>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleConfirmVolunteer} color="primary">
+            <Button
+              onClick={() => handleConfirmVolunteer("Accept")}
+              color="primary"
+            >
               Approve
             </Button>
+            <Button
+              onClick={() => handleConfirmVolunteer("Reject")}
+              color="error"
+            >
+              Reject
+            </Button>
+            <Button onClick={handleClose} color="info">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={openChangeStatus} onClose={handleClose}>
+          <DialogTitle>Change Status Post</DialogTitle>
+          <DialogContent>
+            <div className="change-status-content">
+              <Button
+                color="primary"
+                variant="contained"
+                fullWidth
+                type="submit"
+                style={{ marginTop: "16px" }}
+                onClick={() => handleUpdateStatus(1)}
+              >
+                Pending
+              </Button>
+              <Button
+                color="secondary"
+                variant="contained"
+                fullWidth
+                type="submit"
+                style={{ marginTop: "16px" }}
+                onClick={() => handleUpdateStatus(2)}
+              >
+                Available
+              </Button>
+              <Button
+                color="info"
+                variant="contained"
+                fullWidth
+                type="submit"
+                style={{ marginTop: "16px" }}
+                onClick={() => handleUpdateStatus(3)}
+              >
+                Review
+              </Button>
+              <Button
+                color="success"
+                variant="contained"
+                fullWidth
+                type="submit"
+                style={{ marginTop: "16px" }}
+                onClick={() => handleUpdateStatus(4)}
+              >
+                Approve
+              </Button>
+              <Button
+                color="error"
+                variant="contained"
+                fullWidth
+                type="submit"
+                style={{ marginTop: "16px" }}
+                onClick={() => handleUpdateStatus(5)}
+              >
+                Reject
+              </Button>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setOpenChangeStatus(false)}
+              color="secondary"
+            >
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={openCreateDonate} onClose={handleClose}>
+          <DialogTitle>Create Donate</DialogTitle>
+          <DialogContent>
+            <div>
+              <form
+                onSubmit={formik.handleSubmit}
+                style={{ maxWidth: "500px", margin: "0 auto" }}
+              >
+                <TextField
+                  fullWidth
+                  id="title"
+                  name="title"
+                  label="Title"
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.title && Boolean(formik.errors.title)}
+                  helperText={formik.touched.title && formik.errors.title}
+                  margin="normal"
+                />
+
+                <TextField
+                  fullWidth
+                  id="description"
+                  name="description"
+                  label="Description"
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.description &&
+                    Boolean(formik.errors.description)
+                  }
+                  helperText={
+                    formik.touched.description && formik.errors.description
+                  }
+                  margin="normal"
+                  multiline
+                  rows={4}
+                />
+
+                <TextField
+                  fullWidth
+                  id="targetAmount"
+                  name="targetAmount"
+                  label="Target Amount"
+                  type="number"
+                  value={formik.values.targetAmount}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.targetAmount &&
+                    Boolean(formik.errors.targetAmount)
+                  }
+                  helperText={
+                    formik.touched.targetAmount && formik.errors.targetAmount
+                  }
+                  margin="normal"
+                />
+
+                <div style={{ marginTop: "16px", marginBottom: "8px" }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Start Date"
+                      value={
+                        formik.values.startDate
+                          ? dayjs(formik.values.startDate)
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        formik.setFieldValue(
+                          "startDate",
+                          newValue ? newValue.format("YYYY-MM-DD") : ""
+                        );
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          id: "startDate",
+                          name: "startDate",
+                          onBlur: formik.handleBlur,
+                          error:
+                            formik.touched.startDate &&
+                            Boolean(formik.errors.startDate),
+                          helperText:
+                            formik.touched.startDate && formik.errors.startDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+
+                <div style={{ marginTop: "16px", marginBottom: "8px" }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="End Date"
+                      value={
+                        formik.values.endDate
+                          ? dayjs(formik.values.endDate)
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        formik.setFieldValue(
+                          "endDate",
+                          newValue ? newValue.format("YYYY-MM-DD") : ""
+                        );
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          id: "endDate",
+                          name: "endDate",
+                          onBlur: formik.handleBlur,
+                          error:
+                            formik.touched.endDate &&
+                            Boolean(formik.errors.endDate),
+                          helperText:
+                            formik.touched.endDate && formik.errors.endDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+
+                <FormControl fullWidth style={{ marginBottom: "16px" }}>
+                  <FormLabel component="legend" style={{ marginBottom: "8px" }}>
+                    Hình ảnh
+                  </FormLabel>
+                  <div className="gallery-photo">
+                    {selectedImage && (
+                      <div className="gallery-item">
+                        <img src={selectedImage} alt={"image donate"} />
+                      </div>
+                    )}
+                    <div className="upload-image">
+                      <Button variant="text" component="label">
+                        <AddIcon fontSize="large" />
+                        <input
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={handleImageChange}
+                        />
+                      </Button>
+                    </div>
+                  </div>
+                </FormControl>
+
+                <Button
+                  color="primary"
+                  variant="contained"
+                  fullWidth
+                  type="submit"
+                  style={{ marginTop: "16px" }}
+                >
+                  Submit
+                </Button>
+              </form>
+            </div>
+          </DialogContent>
+          <DialogActions>
             <Button onClick={handleClose} color="secondary">
               Close
             </Button>

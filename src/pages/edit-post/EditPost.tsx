@@ -33,10 +33,6 @@ const EditPost = () => {
   const handleFormSubmit = async (values: any) => {
     values.images = selectedImages;
     updatePost(values);
-    addNotification({
-      content: "Post created successfully",
-      status: "SUCCESS",
-    });
   };
 
   const handleImageChange = async (
@@ -96,9 +92,9 @@ const EditPost = () => {
                 adoptId: post.id,
                 type: post.type,
                 title: post.title,
-                // name: post.petName,
-                description: "",
-                breed: post.petType,
+                petName: post.petName,
+                description: post.description,
+                petTypeId: post.petType,
                 address: post.address,
                 age: post.age,
                 images: post.images,
@@ -117,15 +113,15 @@ const EditPost = () => {
                       value={values.title}
                       onChange={handleChange}
                     />
-                    {/* <Field
-                      name="name"
+                    <Field
+                      name="petName"
                       label="Name"
                       as={TextField}
                       fullWidth
                       margin="normal"
-                      value={values.name}
+                      value={values.petName}
                       onChange={handleChange}
-                    /> */}
+                    />
                     <Field
                       name="description"
                       label="Mô tả chi tiết"
@@ -146,15 +142,15 @@ const EditPost = () => {
                       value={values.address}
                       onChange={handleChange}
                     />
-                    <Field
-                      name="breed"
+                    {/* <Field
+                      name="petTypeId"
                       label="Loại thú cưng"
                       as={TextField}
                       fullWidth
                       margin="normal"
-                      value={values.breed}
+                      value={values.petTypeId}
                       onChange={handleChange}
-                    />
+                    /> */}
                     <Field
                       name="age"
                       label="Tuổi"

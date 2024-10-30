@@ -19,6 +19,7 @@
     }
 
     .content {
+      position: relative;
       padding: 1rem;
       background: white;
       border-radius: 8px;
@@ -48,6 +49,12 @@
           display: grid;
           aspect-ratio: 16/9;
         }
+      }
+
+      .add-donate {
+        right: 1rem;
+        position: absolute;
+        top: 8px;
       }
     }
   }
