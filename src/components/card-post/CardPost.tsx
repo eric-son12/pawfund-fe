@@ -70,15 +70,7 @@ const CardPost: React.FC<CardPostProps> = (props: CardPostProps) => {
         {!props.isOwner && (
           <div className="profile-wrap">
             <div className="profile-detail">
-              {props.post.profileImage ? (
-                <img
-                  className="profile-thumb"
-                  src={props.post.profileImage || "https://i.pravatar.cc/100"}
-                  alt="profile-thumb"
-                />
-              ) : (
-                <Avatar>{props.post.fullName.slice(0, 1)}</Avatar>
-              )}
+              <Avatar>{props.post.fullName.slice(0, 1)}</Avatar>
               <div>
                 <p className="profile-name">{props.post.fullName}</p>
                 <div className="rating">

@@ -95,7 +95,7 @@ export interface PostActions {
   fetchDonateDetail: (id: number) => Promise<Donate>;
   createDonate: (values: CreateEventRequest) => Promise<void>;
   updateDonate: (values: CreateEventRequest) => Promise<void>;
-  donateEvent: (id: number, amount: number) => Promise<void>;
+  donateEvent: (id: number, amount: number) => Promise<string>;
 }
 
 export const initialPost: PostState = {
@@ -170,6 +170,7 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
           );
           post.petType = petTypeFound?.name ?? "Pet";
         });
+        posts.sort((a: any, b: any) => b.id - a.id);
         set((state) => {
           state.post.data = posts;
           state.post.totalCount = totalPost;
@@ -546,7 +547,16 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
           eventId: id,
           amount: amount,
         };
-        await axios.post(`${BASE_URL}/event/donate`, body);
+        const response = await axios.post(`${BASE_URL}/event/donate`, body);
+        const link = response.data?.data;
+        const message = response.data?.message;
+        set((state) => {
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: message,
+          });
+        });
+        return link;
       } catch (error: any) {
         set((state) => {
           const message = error?.response?.data?.message || error?.message;

@@ -29,6 +29,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import AddIcon from "@mui/icons-material/Add";
 import Diversity2Icon from "@mui/icons-material/Diversity2";
@@ -58,6 +59,7 @@ const Dashboard: React.FC = () => {
   const [selectedImage, setSelectedImage] = useState<string>("");
   const [openChangeStatus, setOpenChangeStatus] = useState(false);
   const [openCreateDonate, setOpenCreateDonate] = useState(false);
+  const [openEditDonate, setOpenEditDonate] = useState(false);
 
   const users = useStore((store) => store.users.users);
   const fetchUsers = useStore((store) => store.fetchUsers);
@@ -69,6 +71,7 @@ const Dashboard: React.FC = () => {
   const fetchDonate = useStore((store) => store.fetchListDonate);
 
   const createDonation = useStore((store) => store.createDonate);
+  const updateDonation = useStore((store) => store.updateDonate);
 
   const [showLetter, setShowLetter] = useState<boolean>(false);
   const [letter, setLeter] = useState<LetterVolunteer>();
@@ -262,10 +265,12 @@ const Dashboard: React.FC = () => {
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              handleClickOpen(params.row);
+              setOpenEditDonate(true);
+              formik.setValues(params.row);
+              setSelectedImage(params.row.image);
             }}
           >
-            <ArticleOutlinedIcon />
+            <DriveFileRenameOutlineOutlinedIcon />
           </IconButton>
         </div>
       ),
@@ -296,10 +301,10 @@ const Dashboard: React.FC = () => {
         .min(0, "Target amount must be at least 0")
         .required("Target amount is required"),
     }),
-    onSubmit: (values: any) => {
-      console.log("Form values:", values);
-      createDonation(values);
-      fetchDonate();
+    onSubmit: async (values: any) => {
+      openCreateDonate && (await createDonation(values));
+      openEditDonate && (await updateDonation(values));
+      await fetchDonate();
     },
   });
 
@@ -325,6 +330,7 @@ const Dashboard: React.FC = () => {
     setShowLetter(false);
     setOpenChangeStatus(false);
     setOpenCreateDonate(false);
+    setOpenEditDonate(false);
   };
 
   const showDetailVolunteer = async (id: string, row: any) => {
@@ -617,10 +623,14 @@ const Dashboard: React.FC = () => {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={openCreateDonate} onClose={handleClose}>
+        <Dialog
+          className="donate-modal"
+          open={openCreateDonate}
+          onClose={handleClose}
+        >
           <DialogTitle>Create Donate</DialogTitle>
           <DialogContent>
-            <div>
+            <div className="create-donate">
               <form
                 onSubmit={formik.handleSubmit}
                 style={{ maxWidth: "500px", margin: "0 auto" }}
@@ -751,17 +761,192 @@ const Dashboard: React.FC = () => {
                         <img src={selectedImage} alt={"image donate"} />
                       </div>
                     )}
-                    <div className="upload-image">
-                      <Button variant="text" component="label">
-                        <AddIcon fontSize="large" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          hidden
-                          onChange={handleImageChange}
-                        />
-                      </Button>
-                    </div>
+                    {!selectedImage && (
+                      <div className="upload-image">
+                        <Button variant="text" component="label">
+                          <AddIcon fontSize="large" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={handleImageChange}
+                          />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </FormControl>
+
+                <Button
+                  color="primary"
+                  variant="contained"
+                  fullWidth
+                  type="submit"
+                  style={{ marginTop: "16px" }}
+                >
+                  Submit
+                </Button>
+              </form>
+            </div>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} color="secondary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog
+          className="donate-modal"
+          open={openEditDonate}
+          onClose={handleClose}
+        >
+          <DialogTitle>Edit Donate</DialogTitle>
+          <DialogContent>
+            <div className="edit-donate">
+              <form
+                onSubmit={formik.handleSubmit}
+                style={{ maxWidth: "500px", margin: "0 auto" }}
+              >
+                <TextField
+                  fullWidth
+                  id="title"
+                  name="title"
+                  label="Title"
+                  value={formik.values.title}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={formik.touched.title && Boolean(formik.errors.title)}
+                  helperText={formik.touched.title && formik.errors.title}
+                  margin="normal"
+                />
+
+                <TextField
+                  fullWidth
+                  id="description"
+                  name="description"
+                  label="Description"
+                  value={formik.values.description}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.description &&
+                    Boolean(formik.errors.description)
+                  }
+                  helperText={
+                    formik.touched.description && formik.errors.description
+                  }
+                  margin="normal"
+                  multiline
+                  rows={4}
+                />
+
+                <TextField
+                  fullWidth
+                  id="targetAmount"
+                  name="targetAmount"
+                  label="Target Amount"
+                  type="number"
+                  value={formik.values.targetAmount}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  error={
+                    formik.touched.targetAmount &&
+                    Boolean(formik.errors.targetAmount)
+                  }
+                  helperText={
+                    formik.touched.targetAmount && formik.errors.targetAmount
+                  }
+                  margin="normal"
+                />
+
+                <div style={{ marginTop: "16px", marginBottom: "8px" }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Start Date"
+                      value={
+                        formik.values.startDate
+                          ? dayjs(formik.values.startDate)
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        formik.setFieldValue(
+                          "startDate",
+                          newValue ? newValue.format("YYYY-MM-DD") : ""
+                        );
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          id: "startDate",
+                          name: "startDate",
+                          onBlur: formik.handleBlur,
+                          error:
+                            formik.touched.startDate &&
+                            Boolean(formik.errors.startDate),
+                          helperText:
+                            formik.touched.startDate && formik.errors.startDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+
+                <div style={{ marginTop: "16px", marginBottom: "8px" }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="End Date"
+                      value={
+                        formik.values.endDate
+                          ? dayjs(formik.values.endDate)
+                          : null
+                      }
+                      onChange={(newValue) => {
+                        formik.setFieldValue(
+                          "endDate",
+                          newValue ? newValue.format("YYYY-MM-DD") : ""
+                        );
+                      }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                          id: "endDate",
+                          name: "endDate",
+                          onBlur: formik.handleBlur,
+                          error:
+                            formik.touched.endDate &&
+                            Boolean(formik.errors.endDate),
+                          helperText:
+                            formik.touched.endDate && formik.errors.endDate,
+                        },
+                      }}
+                    />
+                  </LocalizationProvider>
+                </div>
+
+                <FormControl fullWidth style={{ marginBottom: "16px" }}>
+                  <FormLabel component="legend" style={{ marginBottom: "8px" }}>
+                    Hình ảnh
+                  </FormLabel>
+                  <div className="gallery-photo">
+                    {selectedImage && (
+                      <div className="gallery-item">
+                        <img src={selectedImage} alt={"image donate"} />
+                      </div>
+                    )}
+                    {!selectedImage && (
+                      <div className="upload-image">
+                        <Button variant="text" component="label">
+                          <AddIcon fontSize="large" />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={handleImageChange}
+                          />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </FormControl>
 

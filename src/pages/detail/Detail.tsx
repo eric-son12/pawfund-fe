@@ -7,7 +7,7 @@ import PetsOutlinedIcon from "@mui/icons-material/PetsOutlined";
 import CakeOutlinedIcon from "@mui/icons-material/CakeOutlined";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import ContactPageOutlinedIcon from "@mui/icons-material/ContactPageOutlined";
-import { Button, Chip, IconButton } from "@mui/material";
+import { Avatar, Button, Chip, IconButton } from "@mui/material";
 
 import { useStore } from "../../store";
 import Header from "../../components/header/Header";
@@ -162,17 +162,12 @@ const Detail: React.FC = () => {
 
           <div className="right-side-wrap">
             <div className="profile">
-              <img
-                className="avatar"
-                width={32}
-                src={post?.profileImage || "https://i.pravatar.cc/100"}
-                alt="avatar"
-              />
+              <Avatar>{post?.fullName.slice(0, 1)}</Avatar>
               <div className="profile-info">
                 <p className="name">{post?.fullName}</p>
                 <p className="rating">
                   <img width={14} src="/icons/ico-rating.svg" alt="" />
-                  <span className="score"> 3.4</span> ( 12 đánh giá)
+                  <span className="score"> N/a</span> ( 0 đánh giá)
                 </p>
               </div>
             </div>
