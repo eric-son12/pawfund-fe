@@ -18,6 +18,7 @@ import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNone
 import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
 import SearchOutlinedIcon from "@mui/icons-material/SearchOutlined";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import { useFormik } from "formik";
 
 import { useStore } from "../../store";
@@ -36,6 +37,7 @@ const Header: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const changePassword = useStore((store) => store.changePassword);
+  const role = useStore((store) => store.profile.role);
 
   const navigate = useNavigate();
   const logout = useStore((store) => store.logout);
@@ -102,6 +104,14 @@ const Header: React.FC = () => {
         </div>
 
         <div className="action-group-wrap">
+          {(role === "ROLE_VOLUNTEER" || role === "ROLE_ADMIN") && (
+            <IconButton
+              style={{ color: "white", marginRight: "8px" }}
+              onClick={() => navigate("/admin/dashboard")}
+            >
+              <AdminPanelSettingsIcon />
+            </IconButton>
+          )}
           <IconButton
             style={{ color: "white", marginRight: "8px" }}
             onClick={() => navigate("/notification")}

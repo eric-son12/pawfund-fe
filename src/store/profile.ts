@@ -18,6 +18,7 @@ export interface ProfileState {
   user: User | undefined;
   userProfile: UserProfile | undefined;
   error: string | undefined;
+  role: string | undefined;
 }
 
 export interface ProfileActions {
@@ -33,6 +34,7 @@ export const initialProfile: ProfileState = {
   user: undefined,
   userProfile: undefined,
   error: undefined,
+  role: undefined,
 };
 
 export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
@@ -73,7 +75,6 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
           values
         );
         const profile = response.data?.data || undefined;
-        console.log("PRO", profile);
         set((state) => {
           // state.profile.userProfile = profile;
           state.notification.data.push({
@@ -149,16 +150,19 @@ export function profileActions(set: StoreSet, get: StoreGet): ProfileActions {
           password,
         });
         const token = response.data?.data?.token;
+        const role = response.data?.data?.role;
         const user = response.data?.data;
         if (token) {
           localStorage.setItem("token", token);
         }
         set((state) => {
           state.profile.user = user;
+          state.profile.role = role;
           state.notification.data.push({
             content: response.data.message,
             status: "SUCCESS",
           });
+          get().fetchProfile();
         });
       } catch (error: any) {
         set((state) => {

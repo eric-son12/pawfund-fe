@@ -89,6 +89,7 @@ export interface PostActions {
   createPostReceive: (values: CreatePostReceiveRequest) => Promise<void>;
   updatePost: (values: EditPostRequest) => Promise<void>;
   deletePost: (id: number) => Promise<void>;
+  updatePostStatus: (id: number, statusCode: number) => Promise<void>;
   updatePostStatusGive: (id: number, statusCode: number) => Promise<void>;
   updatePostStatusReceive: (id: number, statusCode: number) => Promise<void>;
   fetchListDonate: () => Promise<void>;
@@ -237,6 +238,7 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
           );
           post.petType = petTypeFound?.name ?? "Pet";
         });
+        posts.sort((a: any, b: any) => b.id - a.id);
         set((state) => {
           state.post.history = posts;
           state.post.totalCountHistory = totalPost;
@@ -340,6 +342,42 @@ export function postActions(set: StoreSet, get: StoreGet): PostActions {
           state.notification.data.push({
             status: "SUCCESS",
             content: "Detele post successfully",
+          });
+        });
+      } catch (error: any) {
+        set((state) => {
+          const message = error?.response?.data?.message || error?.message;
+          state.notification.data.push({
+            status: "ERROR",
+            content: message,
+          });
+        });
+      } finally {
+        set((state) => {
+          state.loading.isLoading = false;
+        });
+      }
+    },
+    updatePostStatus: async (id, statusCode) => {
+      set((state) => {
+        state.loading.isLoading = true;
+      });
+      try {
+        //status:
+        //1: Pending (Đang xem xét)
+        //2: Available (Chờ nhận nuôi)
+        //3: Review (Chờ xét duyệt)
+        //4: Approved (Đã phê duyệt)
+        //5: Rejected (Đã từ chối)
+        const body = {
+          adoptId: id,
+          status: statusCode,
+        };
+        await axios.post(`${BASE_URL}/adopt/approve`, body);
+        set((state) => {
+          state.notification.data.push({
+            status: "SUCCESS",
+            content: "Update status successfully",
           });
         });
       } catch (error: any) {

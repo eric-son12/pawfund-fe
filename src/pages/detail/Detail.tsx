@@ -36,9 +36,11 @@ const Detail: React.FC = () => {
 
   const [post, setPost] = useState<PostDetail>();
 
+  const profile = useStore((store) => store.profile.userProfile);
   const categories = useStore((store) => store.post.petType);
   const fetchPetType = useStore((store) => store.fetchPetType);
   const postDetail = useStore((store) => store.postDetailFetch);
+  const addNotification = useStore((store) => store.addNotification);
 
   useEffect(() => {
     const getPostDetail = async () => {
@@ -56,6 +58,28 @@ const Detail: React.FC = () => {
     speed: 500,
     slidesToShow: 1,
     slidesToScroll: 1,
+  };
+
+  const handleRequest = async () => {
+    const token =
+      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZWdpc3RlcjMwMTB2QGdtYWlsLmNvbSIsImlhdCI6MTczMDI3NDIzNywiZXhwIjoxNzMwODc5MDM3fQ.IRnHgazY-UWF0061jfA1eO1Vka_Gj3zAjjDoiC5qBdk";
+    const url = `https://spacesport.pro/api/adopt/changeStatus`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        adoptId: post?.id,
+        status: 3,
+      }),
+    });
+
+    const data = await response.json();
+    if (data)
+      addNotification({ status: "SUCCESS", content: "Yêu cầu đã được gửi" });
   };
 
   return (
@@ -172,22 +196,25 @@ const Detail: React.FC = () => {
               </div>
             </div>
 
-            <Button
+            {/* <Button
               fullWidth
               variant="outlined"
               color="primary"
               startIcon={<ContactPageOutlinedIcon />}
             >
               Xem thông tin
-            </Button>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              startIcon={<PhoneOutlinedIcon />}
-            >
-              Gửi yêu cầu
-            </Button>
+            </Button> */}
+            {post?.fullName !== profile?.fullName && (
+              <Button
+                fullWidth
+                variant="contained"
+                color="primary"
+                startIcon={<PhoneOutlinedIcon />}
+                onClick={handleRequest}
+              >
+                Gửi yêu cầu
+              </Button>
+            )}
           </div>
         </div>
       </div>

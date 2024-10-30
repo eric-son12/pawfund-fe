@@ -463,7 +463,10 @@ const Dashboard: React.FC = () => {
                 className="add-donate"
                 color="primary"
                 aria-label="add"
-                onClick={() => setOpenCreateDonate(true)}
+                onClick={() => {
+                  setOpenCreateDonate(true);
+                  formik.resetForm();
+                }}
               >
                 <AddIcon />
               </Fab>

@@ -21,10 +21,12 @@ import Profile from "./pages/profile/Profile";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Loading from "./components/loading/Loading";
 import NotificationItem from "./components/notification-item/NotificationItem";
+import { useStore } from "./store";
 
 function App() {
+  const role = useStore((store) => store.profile.role);
+
   const isAuthenticated = !!localStorage.getItem("token");
-  const isAdmin = true;
 
   const router = createBrowserRouter([
     {
@@ -41,7 +43,11 @@ function App() {
     },
     {
       path: "create-post",
-      element: <CreatePost />,
+      element: (
+        <ProtectedRoute isAllowed={isAuthenticated} redirectPath="/login">
+          <CreatePost />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "edit-post/:slug",
@@ -53,12 +59,22 @@ function App() {
     },
     {
       path: "admin/dashboard",
-      element: <Dashboard />,
+      element: (
+        <ProtectedRoute
+          isAllowed={
+            isAuthenticated &&
+            (role === "ROLE_VOLUNTEER" || role === "ROLE_ADMIN")
+          }
+          redirectPath="/"
+        >
+          <Dashboard />
+        </ProtectedRoute>
+      ),
     },
     {
       path: "listing",
       element: (
-        <ProtectedRoute isAllowed={isAuthenticated && isAdmin}>
+        <ProtectedRoute isAllowed={isAuthenticated} redirectPath="/login">
           <Listing />
         </ProtectedRoute>
       ),
