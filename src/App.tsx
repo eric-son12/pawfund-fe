@@ -21,10 +21,9 @@ import Profile from "./pages/profile/Profile";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Loading from "./components/loading/Loading";
 import NotificationItem from "./components/notification-item/NotificationItem";
-import { useStore } from "./store";
 
 function App() {
-  const role = useStore((store) => store.profile.role);
+  const role = localStorage.getItem("role");
 
   const isAuthenticated = !!localStorage.getItem("token");
 

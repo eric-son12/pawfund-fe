@@ -29,7 +29,7 @@ export const StatusLabel: React.FC<{ status: number }> = ({ status }) => {
       case 2:
         return { label: "Hoàn thành", color: "#4CAF50" };
       case 3:
-        return { label: "Không hoàn thành", color: "#FF6347" };
+        return { label: "Chưa hoàn thành", color: "#FF6347" };
       case 4:
         return { label: "Hủy", color: "#808080" };
       default:

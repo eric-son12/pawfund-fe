@@ -302,9 +302,16 @@ const Dashboard: React.FC = () => {
         .required("Target amount is required"),
     }),
     onSubmit: async (values: any) => {
-      openCreateDonate && (await createDonation(values));
-      openEditDonate && (await updateDonation(values));
-      await fetchDonate();
+      if (openCreateDonate) {
+        await createDonation(values);
+        await fetchDonate();
+        formik.resetForm();
+        setSelectedImage("");
+      } else if (openEditDonate) {
+        await updateDonation(values);
+        await fetchDonate();
+        setSelectedImage("");
+      }
     },
   });
 
@@ -489,10 +496,13 @@ const Dashboard: React.FC = () => {
           <DialogActions>
             <Button
               onClick={async () => {
-                type === "post"
-                  ? deletePost(selectedRow.id)
-                  : deactivateUser(selectedRow.id);
-                await fetchUsers();
+                if (type === "post") {
+                  await deletePost(selectedRow.id);
+                  await fetchPosts();
+                } else if (type === "user") {
+                  await deactivateUser(selectedRow.id);
+                  await fetchUsers();
+                }
                 handleClose();
               }}
               color="primary"
@@ -564,56 +574,36 @@ const Dashboard: React.FC = () => {
           <DialogTitle>Change Status Post</DialogTitle>
           <DialogContent>
             <div className="change-status-content">
-              <Button
-                color="primary"
-                variant="contained"
-                fullWidth
-                type="submit"
-                style={{ marginTop: "16px" }}
-                onClick={() => handleUpdateStatus(1)}
-              >
-                Pending
-              </Button>
-              <Button
-                color="secondary"
-                variant="contained"
-                fullWidth
-                type="submit"
-                style={{ marginTop: "16px" }}
-                onClick={() => handleUpdateStatus(2)}
-              >
-                Available
-              </Button>
-              <Button
-                color="info"
-                variant="contained"
-                fullWidth
-                type="submit"
-                style={{ marginTop: "16px" }}
-                onClick={() => handleUpdateStatus(3)}
-              >
-                Review
-              </Button>
-              <Button
-                color="success"
-                variant="contained"
-                fullWidth
-                type="submit"
-                style={{ marginTop: "16px" }}
-                onClick={() => handleUpdateStatus(4)}
-              >
-                Approve
-              </Button>
-              <Button
-                color="error"
-                variant="contained"
-                fullWidth
-                type="submit"
-                style={{ marginTop: "16px" }}
-                onClick={() => handleUpdateStatus(5)}
-              >
-                Reject
-              </Button>
+              {selectedRowPost && selectedRowPost.status !== 2 && (
+                <Button
+                  color="secondary"
+                  variant="contained"
+                  fullWidth
+                  type="submit"
+                  style={{ marginTop: "16px" }}
+                  onClick={async () => {
+                    await handleUpdateStatus(2);
+                    await fetchPosts();
+                  }}
+                >
+                  Available
+                </Button>
+              )}
+              {selectedRowPost && selectedRowPost.status !== 5 && (
+                <Button
+                  color="error"
+                  variant="contained"
+                  fullWidth
+                  type="submit"
+                  style={{ marginTop: "16px" }}
+                  onClick={async () => {
+                    await handleUpdateStatus(5);
+                    await fetchPosts();
+                  }}
+                >
+                  Reject
+                </Button>
+              )}
             </div>
           </DialogContent>
           <DialogActions>

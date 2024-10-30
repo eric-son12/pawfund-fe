@@ -37,7 +37,7 @@ const Header: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
   const changePassword = useStore((store) => store.changePassword);
-  const role = useStore((store) => store.profile.role);
+  const role = localStorage.getItem("role");
 
   const navigate = useNavigate();
   const logout = useStore((store) => store.logout);
