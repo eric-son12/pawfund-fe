@@ -21,9 +21,15 @@ import Profile from "./pages/profile/Profile";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import Loading from "./components/loading/Loading";
 import NotificationItem from "./components/notification-item/NotificationItem";
+import { useStore } from "./store";
+import { useMemo } from "react";
 
 function App() {
-  const role = localStorage.getItem("role");
+  const user = useStore((store) => store.profile.user);
+
+  const role = useMemo(() => {
+    return user?.role || localStorage.getItem("role");
+  }, [user]);
 
   const isAuthenticated = !!localStorage.getItem("token");
 
