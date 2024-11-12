@@ -65,7 +65,7 @@ const Detail: React.FC = () => {
 
   const handleRequest = async () => {
     const token =
-      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyZWdpc3RlcjMwMTB2QGdtYWlsLmNvbSIsImlhdCI6MTczMDI3NDIzNywiZXhwIjoxNzMwODc5MDM3fQ.IRnHgazY-UWF0061jfA1eO1Vka_Gj3zAjjDoiC5qBdk";
+      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0aGlldXR1YW5AZ21haWwuY29tIiwiaWF0IjoxNzMxNDMxODI3LCJleHAiOjE3MzIwMzY2Mjd9.NwLbbx8VNMSPJerdXvKaeNVhFSF76N2YayQVsKFlphg";
     const url = `https://spacesport.pro/api/adopt/changeStatus`;
 
     const response = await fetch(url, {
